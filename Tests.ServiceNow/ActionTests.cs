@@ -1,7 +1,7 @@
-﻿using Apps.Appname.Actions;
-using Tests.Appname.Base;
+using Apps.ServiceNow.Actions;
+using Tests.ServiceNow.Base;
 
-namespace Tests.Appname;
+namespace Tests.ServiceNow;
 
 [TestClass]
 public class ActionTests : TestBase

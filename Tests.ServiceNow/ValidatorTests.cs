@@ -1,8 +1,8 @@
-using Apps.Appname.Connections;
+using Apps.ServiceNow.Connections;
 using Blackbird.Applications.Sdk.Common.Authentication;
-using Tests.Appname.Base;
+using Tests.ServiceNow.Base;
 
-namespace Tests.Appname;
+namespace Tests.ServiceNow;
 
 [TestClass]
 public class ConnectionValidatorTests : TestBase

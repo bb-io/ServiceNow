@@ -1,11 +1,11 @@
-﻿using Apps.Appname.Api;
+using Apps.ServiceNow.Api;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Authentication;
 using Blackbird.Applications.Sdk.Common.Connections;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using RestSharp;
 
-namespace Apps.Appname.Connections;
+namespace Apps.ServiceNow.Connections;
 
 public class ConnectionValidator(InvocationContext invocationContext) : BaseInvocable(invocationContext), IConnectionValidator
 {

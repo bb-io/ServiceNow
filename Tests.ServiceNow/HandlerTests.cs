@@ -1,8 +1,8 @@
-﻿using Apps.Appname.Handlers;
+using Apps.ServiceNow.Handlers;
 using Blackbird.Applications.Sdk.Common.Dynamic;
-using Tests.Appname.Base;
+using Tests.ServiceNow.Base;
 
-namespace Tests.Appname;
+namespace Tests.ServiceNow;
 
 [TestClass]
 public class HandlerTests : TestBase
