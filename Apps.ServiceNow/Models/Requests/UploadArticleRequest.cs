@@ -15,6 +15,7 @@ public class UploadArticleRequest : IUploadContentInput
     [DataSource(typeof(LanguageDataHandler))]
     public string Locale { get; set; } = string.Empty;
 
-    [Display("Article ID", Description = "The article (sys_id) to write the translated fields into. Leave empty to use the id embedded in the file.")]
+    [Display("Article ID", Description = "The article to write the translated fields into. Start typing to search by number or title. Leave empty to use the id embedded in the file.")]
+    [DataSource(typeof(ArticleDataHandler))]
     public string? ContentId { get; set; }
 }

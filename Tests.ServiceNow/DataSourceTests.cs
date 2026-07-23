@@ -36,6 +36,15 @@ public class DataSourceTests : TestBase
     }
 
     [TestMethod]
+    public async Task ArticleHandler_ReturnsItems()
+    {
+        var handler = new ArticleDataHandler(InvocationContext);
+        var items = (await handler.GetDataAsync(new DataSourceContext(), CancellationToken.None)).ToList();
+        foreach (var i in items) Console.WriteLine($"{i.Value}: {i.DisplayName}");
+        Assert.IsTrue(items.Count > 0);
+    }
+
+    [TestMethod]
     public void StaticHandlers_ReturnUniqueItems()
     {
         AssertUnique(new ArticleStateDataHandler().GetData());

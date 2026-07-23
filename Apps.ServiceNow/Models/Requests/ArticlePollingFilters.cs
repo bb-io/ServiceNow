@@ -8,7 +8,8 @@ namespace Apps.ServiceNow.Models.Requests;
 
 public class ArticleCreatedOrUpdatedFilter
 {
-    [Display("Article ID", Description = "Only watch this single article (its sys_id). Leave empty to watch all articles.")]
+    [Display("Article ID", Description = "Only watch this single article. Start typing to search by number or title. Leave empty to watch all articles.")]
+    [DataSource(typeof(ArticleDataHandler))]
     public string? ArticleId { get; set; }
 
     [Display("Language", Description = "Only trigger for articles in this language. Leave empty for any language.")]
@@ -22,7 +23,8 @@ public class ArticleCreatedOrUpdatedFilter
 
 public class ArticleStatusChangedFilter
 {
-    [Display("Article ID", Description = "Only watch this single article (its sys_id). Leave empty to watch all articles.")]
+    [Display("Article ID", Description = "Only watch this single article. Start typing to search by number or title. Leave empty to watch all articles.")]
+    [DataSource(typeof(ArticleDataHandler))]
     public string? ArticleId { get; set; }
 
     [Display("Language", Description = "Only watch articles in this language. Leave empty for any language.")]

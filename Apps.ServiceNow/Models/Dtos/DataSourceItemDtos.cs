@@ -20,3 +20,10 @@ public class UserItemDto
     [JsonProperty("name")] public string? Name { get; set; }
     [JsonProperty("user_name")] public string? UserName { get; set; }
 }
+
+public class ArticleItemDto
+{
+    [JsonProperty("sys_id")] public string? SysId { get; set; }
+    [JsonProperty("number")] public string? Number { get; set; }
+    [JsonProperty("short_description")] public string? ShortDescription { get; set; }
+}

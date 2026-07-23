@@ -7,7 +7,8 @@ namespace Apps.ServiceNow.Models.Requests;
 
 public class DownloadArticleRequest : IDownloadContentInput
 {
-    [Display("Article ID", Description = "The unique identifier (sys_id) of the knowledge article to download. You can get it from the 'Search articles' action.")]
+    [Display("Article ID", Description = "The knowledge article to download. Start typing to search by number or title.")]
+    [DataSource(typeof(ArticleDataHandler))]
     public string ContentId { get; set; } = string.Empty;
 
     [Display("Language", Description = "The language version to download. Defaults to the article's own language when left empty.")]
