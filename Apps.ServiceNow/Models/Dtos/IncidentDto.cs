@@ -2,7 +2,6 @@ using Newtonsoft.Json;
 
 namespace Apps.ServiceNow.Models.Dtos;
 
-/// <summary>An incident record as returned by the Table API (raw values).</summary>
 public class IncidentDto
 {
     [JsonProperty("sys_id")] public string SysId { get; set; } = string.Empty;

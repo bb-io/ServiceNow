@@ -18,7 +18,6 @@ public class AttachmentActionTests : TestBase
         var attachmentActions = new AttachmentActions(InvocationContext, FileManager);
         var client = new Client(Creds.ToArray());
 
-        // Arrange: create a disposable incident and attach a file to it via the raw Attachment API.
         var incident = await incidentActions.CreateIncident(new CreateIncidentRequest
         {
             ShortDescription = "Blackbird attachment test incident"
@@ -40,13 +39,11 @@ public class AttachmentActionTests : TestBase
             Assert.IsTrue(attachments.Count > 0, "Expected at least one attachment on the incident.");
             var attachmentId = attachments[0].SysId;
 
-            // Act
             var result = await attachmentActions.DownloadAttachment(new DownloadAttachmentRequest
             {
                 AttachmentId = attachmentId
             });
 
-            // Assert
             Console.WriteLine($"Downloaded {result.File?.Name}, {result.FileSize} bytes, type {result.ContentType}");
             Assert.IsNotNull(result.File);
             Assert.IsTrue(result.FileSize > 0);

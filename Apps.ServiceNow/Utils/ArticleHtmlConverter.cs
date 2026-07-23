@@ -7,18 +7,8 @@ using HtmlAgilityPack;
 
 namespace Apps.ServiceNow.Utils;
 
-/// <summary>
-/// The two halves of the translation roundtrip contract for ServiceNow knowledge articles:
-/// <see cref="ToHtml"/> turns a kb_knowledge record into a self-describing HTML file, and
-/// <see cref="ParseHtml"/> reads that file (or a translated copy of it) back into fields.
-/// Both are pure and API-free so they can be unit-tested offline.
-/// </summary>
 public static class ArticleHtmlConverter
 {
-    // -----------------------------------------------------------------------------------------
-    // JSON/record -> HTML
-    // -----------------------------------------------------------------------------------------
-
     public static string ToHtml(ArticleHtmlModel model)
     {
         var doc = new HtmlDocument();
@@ -52,8 +42,6 @@ public static class ArticleHtmlConverter
         entry.SetAttributeValue(RoundtripHtml.EntryIdAttr, model.EntryId);
         body.AppendChild(entry);
 
-        // Title (short_description) — plain text in an <h1>. Structural characters are HTML-encoded
-        // so a title containing <, & or " cannot corrupt the document and round-trips exactly.
         if (!string.IsNullOrEmpty(model.Title))
         {
             var titleNode = doc.CreateElement("h1");
@@ -64,7 +52,6 @@ public static class ArticleHtmlConverter
             entry.AppendChild(titleNode);
         }
 
-        // Body (text) — HTML markup in a <div>.
         if (!string.IsNullOrEmpty(model.Body))
         {
             var bodyNode = doc.CreateElement("div");
@@ -76,10 +63,6 @@ public static class ArticleHtmlConverter
 
         return doc.DocumentNode.OuterHtml;
     }
-
-    // -----------------------------------------------------------------------------------------
-    // HTML -> JSON/fields
-    // -----------------------------------------------------------------------------------------
 
     public static ParsedArticleFile ParseHtml(string html)
     {
@@ -134,10 +117,6 @@ public static class ArticleHtmlConverter
         return result;
     }
 
-    /// <summary>
-    /// Normalizes an HTML fragment (parse + re-serialize) so two semantically equal bodies that
-    /// differ only in incidental formatting compare equal — used to skip no-op API writes.
-    /// </summary>
     public static string NormalizeHtml(string? html)
     {
         if (string.IsNullOrEmpty(html))
@@ -146,10 +125,6 @@ public static class ArticleHtmlConverter
         doc.LoadHtml(html);
         return doc.DocumentNode.OuterHtml.Trim();
     }
-
-    // -----------------------------------------------------------------------------------------
-    // Helpers
-    // -----------------------------------------------------------------------------------------
 
     private static void ApplyFieldAttributes(HtmlNode node, string entryId, string fieldId,
         string fieldType, bool isHtml, SizeRestrictions? size)

@@ -4,10 +4,6 @@ using Blackbird.Applications.SDK.Blueprints.Interfaces.CMS;
 
 namespace Apps.ServiceNow.Models.Responses;
 
-/// <summary>
-/// Output of both roundtrip actions: "Download article" returns the freshly built translatable
-/// file; "Upload article" returns the imported file stamped with the target-system reference.
-/// </summary>
 public class DownloadContentOutput : IDownloadContentOutput
 {
     [Display("File", Description = "The self-describing translatable file (download) or the imported file (upload).")]

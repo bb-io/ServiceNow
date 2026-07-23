@@ -24,8 +24,7 @@ namespace Apps.ServiceNow.Actions;
 public class ArticleActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : Invocable(invocationContext)
 {
-    private const string MetadataFields =
-        "sys_id,number,short_description,workflow_state,kb_knowledge_base,kb_category,language,author,article_type,sys_created_on,sys_updated_on,text";
+    private const string MetadataFields = TableFields.Article;
 
     [Action("Search articles", Description = "Find knowledge articles matching a search text and optional filters.")]
     public async Task<SearchArticlesResponse> SearchArticles([ActionParameter] SearchArticlesRequest request)
@@ -94,8 +93,6 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
         return new ArticleMetadataResponse(dto);
     }
 
-    // Raw (writable) kb_knowledge fields used by the translation roundtrip. The roundtrip reads the
-    // Table API `text` column (not the KM rendered `content`) so the same value can be written back.
     private const string RoundtripFields = "sys_id,number,short_description,text,language,workflow_state";
 
     [BlueprintActionDefinition(BlueprintAction.DownloadContent)]
@@ -147,7 +144,6 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
 
         var errors = new List<ContentProcessingError>();
 
-        // 1. Load the file through the universal Transformation wrapper (handles bilingual + monolingual).
         var download = await fileManagementClient.DownloadAsync(input.Content);
         var bytes = await download.GetByteData();
         var loadResult = Transformation.Load(new MemoryStream(bytes), name, input.Content.ContentType);
@@ -166,12 +162,10 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
             content = rawHtml;
         }
 
-        // 2. Parse back into objects; fall back to the raw HTML if the wrapper stripped our structure.
         var parsed = ArticleHtmlConverter.ParseHtml(content);
         if (parsed.Entries.Count == 0 && !ReferenceEquals(content, rawHtml))
             parsed = ArticleHtmlConverter.ParseHtml(rawHtml);
 
-        // 3. Reconstruct each object and write only the changed fields back.
         foreach (var entry in parsed.Entries)
         {
             var targetId = !string.IsNullOrWhiteSpace(input.ContentId) ? input.ContentId : entry.EntryId;
@@ -195,11 +189,9 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
             }
         }
 
-        // 4. Return the file stamped with the target-system reference (for Blacklake).
         return await BuildUploadOutput(input, loadResult, parsed, errors);
     }
 
-    /// <summary>Overlays the translated title/body onto the current record and PATCHes only what changed.</summary>
     private async Task ApplyTranslatedFields(string articleId, ParsedEntry entry)
     {
         var current = await Client.GetRecordAsync<ArticleDto>(ApiEndpoints.KnowledgeTable, articleId,
@@ -224,7 +216,7 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
         }
 
         if (body.Count == 0)
-            return; // nothing actually changed — don't touch the API
+            return;
 
         await Client.UpdateRecordAsync<ArticleDto>(ApiEndpoints.KnowledgeTable, articleId, body,
             new Dictionary<string, string> { ["sysparm_fields"] = RoundtripFields });
@@ -267,14 +259,13 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
         }
         else
         {
-            output.Content = input.Content; // not interoperable — echo the input back
+            output.Content = input.Content;
         }
 
         output.Errors = errors.Count > 0 ? errors : null;
         return output;
     }
 
-    /// <summary>Fills the transformation's target-system reference from the article as it now exists.</summary>
     private async Task StampTargetReference(Transformation transformation, string articleId, string locale)
     {
         transformation.TargetLanguage = locale;
@@ -296,7 +287,6 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
         }
         catch
         {
-            // best-effort: a missing reference must not fail the whole upload
         }
     }
 

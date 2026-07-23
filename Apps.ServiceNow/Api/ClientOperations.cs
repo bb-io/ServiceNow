@@ -10,10 +10,6 @@ public partial class Client
 {
     private const int TablePageSize = 100;
 
-    // ---------------------------------------------------------------------
-    // Generic Table API helpers
-    // ---------------------------------------------------------------------
-
     public async Task<T> GetRecordAsync<T>(string table, string sysId, IReadOnlyDictionary<string, string>? query = null)
     {
         var request = new RestRequest($"{table}/{sysId}", Method.Get);
@@ -45,10 +41,6 @@ public partial class Client
             throw ConfigureErrorException(response);
     }
 
-    /// <summary>
-    /// Retrieves every matching record across all pages (hides sysparm_limit/offset). Stops early
-    /// when an optional maximum is reached. Returns an empty list when nothing matches.
-    /// </summary>
     public async Task<List<T>> SearchTableAsync<T>(string table, IReadOnlyDictionary<string, string> query, int? max = null)
     {
         var results = new List<T>();
@@ -83,14 +75,6 @@ public partial class Client
         return max.HasValue ? results.Take(max.Value).ToList() : results;
     }
 
-    // ---------------------------------------------------------------------
-    // Knowledge Management API
-    // ---------------------------------------------------------------------
-
-    /// <summary>
-    /// Searches articles through the KM API, paging over limit/offset until meta.count is reached
-    /// (or the optional maximum). The KM API returns HTTP 200 on failure, so error_msg is inspected.
-    /// </summary>
     public async Task<List<KmSearchArticleDto>> SearchArticlesAsync(
         IReadOnlyDictionary<string, string> query, int? max = null)
     {
@@ -128,10 +112,6 @@ public partial class Client
         return max.HasValue ? results.Take(max.Value).ToList() : results;
     }
 
-    // ---------------------------------------------------------------------
-    // Attachment API
-    // ---------------------------------------------------------------------
-
     public async Task<List<AttachmentDto>> ListAttachmentsAsync(string table, string recordId)
     {
         var request = new RestRequest(ApiEndpoints.Attachment, Method.Get)
@@ -158,10 +138,6 @@ public partial class Client
         var contentType = response.ContentType ?? "application/octet-stream";
         return (response.RawBytes ?? Array.Empty<byte>(), contentType);
     }
-
-    // ---------------------------------------------------------------------
-    // Helpers
-    // ---------------------------------------------------------------------
 
     private static void AddQuery(RestRequest request, IReadOnlyDictionary<string, string>? query)
     {

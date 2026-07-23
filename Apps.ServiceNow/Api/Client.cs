@@ -13,7 +13,6 @@ namespace Apps.ServiceNow.Api;
 
 public partial class Client : BlackBirdRestClient
 {
-    /// <summary>The resolved instance base URL (e.g. https://dev190007.service-now.com), no trailing slash.</summary>
     public Uri InstanceBaseUrl { get; }
 
     public Client(IEnumerable<AuthenticationCredentialsProvider> creds) : base(new RestClientOptions
@@ -30,11 +29,9 @@ public partial class Client : BlackBirdRestClient
         this.AddDefaultHeader("Authorization", $"Basic {token}");
     }
 
-    /// <summary>The editor URL for a knowledge article record.</summary>
     public string GetArticleAdminUrl(string sysId) =>
         $"{InstanceBaseUrl.ToString().TrimEnd('/')}/kb_knowledge.do?sys_id={sysId}";
 
-    /// <summary>The reader URL for a knowledge article (by its human number).</summary>
     public string? GetArticlePublicUrl(string? number) =>
         string.IsNullOrWhiteSpace(number)
             ? null
@@ -72,7 +69,6 @@ public partial class Client : BlackBirdRestClient
         if (response.StatusCode is HttpStatusCode.BadRequest)
             return new PluginMisconfigurationException($"Invalid request: {message}. Please review your input.");
 
-        // 5xx and everything else = a ServiceNow-side problem, not the user's fault.
         return new PluginApplicationException($"ServiceNow returned an error: {message}");
     }
 

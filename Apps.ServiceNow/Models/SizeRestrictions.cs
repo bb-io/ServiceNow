@@ -2,10 +2,6 @@ using Newtonsoft.Json;
 
 namespace Apps.ServiceNow.Models;
 
-/// <summary>
-/// CMS-enforced length limits for a field, serialized into <c>data-blackbird-size</c> so downstream
-/// translation apps don't overflow a short-text field. Only the non-null bounds are serialized.
-/// </summary>
 public class SizeRestrictions
 {
     [JsonProperty("MinimumSize", NullValueHandling = NullValueHandling.Ignore)]
@@ -17,7 +13,6 @@ public class SizeRestrictions
 
 public static class SizeRestrictionHelper
 {
-    /// <summary>Serializes the restrictions, or returns null when there is nothing to serialize.</summary>
     public static string? Serialize(SizeRestrictions? restrictions)
     {
         if (restrictions is null || (restrictions.MinimumSize is null && restrictions.MaximumSize is null))

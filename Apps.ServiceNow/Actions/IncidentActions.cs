@@ -13,8 +13,7 @@ namespace Apps.ServiceNow.Actions;
 [ActionList("Incidents")]
 public class IncidentActions(InvocationContext invocationContext) : Invocable(invocationContext)
 {
-    private const string IncidentFields =
-        "sys_id,number,short_description,description,state,priority,urgency,impact,caller_id,assigned_to,sys_created_on,sys_updated_on";
+    private const string IncidentFields = TableFields.Incident;
 
     [Action("Create incident", Description = "Open a new incident.")]
     public async Task<IncidentResponse> CreateIncident([ActionParameter] CreateIncidentRequest request)

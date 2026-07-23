@@ -2,7 +2,6 @@ using Newtonsoft.Json;
 
 namespace Apps.ServiceNow.Models.Dtos;
 
-/// <summary>A kb_knowledge record as returned by the Table API.</summary>
 public class ArticleDto
 {
     [JsonProperty("sys_id")] public string SysId { get; set; } = string.Empty;

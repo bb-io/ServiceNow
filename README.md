@@ -73,6 +73,18 @@ A ServiceNow administrator can install it as follows:
 
 - **Download attachment** — Download the file content of an attachment by its ID.
 
+## Events
+
+### Articles
+
+- **On articles created or updated** — Triggers for knowledge articles created or updated since the previous poll. Optional filters: article ID (watch a single article), language, and knowledge bases. Each returned article is tagged as *created* or *updated*.
+- **On articles status changed** — Triggers when an article's workflow state (draft, review, published, retired) changes. Optional filters: article ID, language, knowledge bases, and status (only trigger when the article changes *into* one of the selected states). Reports the previous and new state.
+
+### Incidents
+
+- **On new incidents** — Triggers for incidents opened since the previous poll.
+- **On new incident comment** — Triggers for customer-visible incident comments added since the previous poll, each with the incident it belongs to. New comments are read in a single query across all incidents, so cost does not grow with the number of incidents.
+
 ## Feedback
 
 Do you want to use this app or do you have feedback on our implementation? Reach out to us using the [established channels](https://www.blackbird.io/) or create an issue.

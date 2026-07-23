@@ -9,10 +9,6 @@ using HtmlAgilityPack;
 
 namespace Tests.ServiceNow;
 
-/// <summary>
-/// Pure, API-free tests of the translation roundtrip converters (record -> HTML and HTML -> fields).
-/// They exercise the self-describing-file contract from simple to complex without any network access.
-/// </summary>
 [TestClass]
 public class ConverterTests
 {
@@ -35,10 +31,6 @@ public class ConverterTests
         doc.LoadHtml(html);
         return doc;
     }
-
-    // -----------------------------------------------------------------------------------------
-    // Metadata / skeleton
-    // -----------------------------------------------------------------------------------------
 
     [TestMethod]
     public void ToHtml_EmitsRequiredMetadataAndSkeleton()
@@ -100,10 +92,6 @@ public class ConverterTests
         Assert.IsNotNull(doc.DocumentNode.SelectSingleNode($"//*[@{RoundtripHtml.FieldIdAttr}='text']"));
     }
 
-    // -----------------------------------------------------------------------------------------
-    // Round-trip: simple -> complex
-    // -----------------------------------------------------------------------------------------
-
     [TestMethod]
     public void Roundtrip_SimpleTitleAndBody()
     {
@@ -149,10 +137,6 @@ public class ConverterTests
         Assert.AreEqual(ArticleId, parsed.MainEntryId);
     }
 
-    // -----------------------------------------------------------------------------------------
-    // Parsing behaviour
-    // -----------------------------------------------------------------------------------------
-
     [TestMethod]
     public void ParseHtml_ReturnsEntryWithBothFields()
     {
@@ -176,7 +160,6 @@ public class ConverterTests
     [TestMethod]
     public void ParseHtml_ReadsTranslatorEditedValues()
     {
-        // Simulate a translator who replaced the visible text but kept the data-* attributes.
         var html = ArticleHtmlConverter.ToHtml(SampleModel("Original title", "<p>Original body</p>"));
         var translated = html
             .Replace("Original title", "Titre traduit")
@@ -192,7 +175,6 @@ public class ConverterTests
     [TestMethod]
     public void ParseHtml_IgnoresNodesWithoutFieldAttributes()
     {
-        // A plain paragraph the translator might add outside a field node must not become a field.
         var html = ArticleHtmlConverter.ToHtml(SampleModel("Title", "<p>Body</p>"));
         var withNoise = html.Replace("</body>", "<div><p>Not a field</p></div></body>");
 
@@ -203,7 +185,6 @@ public class ConverterTests
     [TestMethod]
     public void NormalizeHtml_TreatsEquivalentMarkupAsEqual()
     {
-        // Re-serialized body from a roundtrip should normalize equal to the original stored body.
         var original = "<p>Hello <strong>world</strong></p>";
         var html = ArticleHtmlConverter.ToHtml(SampleModel("T", original));
         var parsedBody = ArticleHtmlConverter.ParseHtml(html).Entries.Single()
@@ -213,10 +194,6 @@ public class ConverterTests
             ArticleHtmlConverter.NormalizeHtml(original),
             ArticleHtmlConverter.NormalizeHtml(parsedBody));
     }
-
-    // -----------------------------------------------------------------------------------------
-    // Blackbird.Filters interoperability (mirrors what the Upload action does with the file)
-    // -----------------------------------------------------------------------------------------
 
     [TestMethod]
     public void Transformation_LoadThenTargetThenParse_PreservesFieldStructure()
@@ -245,7 +222,6 @@ public class ConverterTests
     [TestMethod]
     public void Transformation_CarriesTranslatedText_ThroughTarget()
     {
-        // A translator edits the visible text; after the wrapper roundtrip the new text must be readable.
         var html = ArticleHtmlConverter.ToHtml(SampleModel("Source title", "<p>Source body</p>"));
         var translated = html.Replace("Source title", "Target title").Replace("Source body", "Target body");
         var bytes = Encoding.UTF8.GetBytes(translated);
@@ -261,15 +237,10 @@ public class ConverterTests
         StringAssert.Contains(entry.Fields.Single(f => f.FieldId == "text").Value, "Target body");
     }
 
-    // -----------------------------------------------------------------------------------------
-    // Helpers
-    // -----------------------------------------------------------------------------------------
-
     private static void AssertRoundtrip(string title, string body)
     {
         var html = ArticleHtmlConverter.ToHtml(SampleModel(title, body));
 
-        // The produced document must itself be parseable HTML.
         var parsed = ArticleHtmlConverter.ParseHtml(html);
         var entry = parsed.Entries.Single();
 

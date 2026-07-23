@@ -31,8 +31,6 @@ public class ConnectionValidator(InvocationContext invocationContext)
                     Message = "Authentication failed — check your username and password."
                 };
 
-            // The request never reached a ServiceNow server (bad host / DNS / connection refused).
-            // A wrong instance URL is a user-fixable configuration problem, so mark it invalid.
             if (response.ResponseStatus != ResponseStatus.Completed)
                 return new ConnectionValidationResponse
                 {
@@ -41,8 +39,6 @@ public class ConnectionValidator(InvocationContext invocationContext)
                               (response.ErrorMessage ?? string.Empty)
                 };
 
-            // Any other completed-but-non-success response (5xx, transient) is not a credentials
-            // problem, so the connection is not marked invalid.
             return new ConnectionValidationResponse { IsValid = true, Message = "Success" };
         }
         catch (Exception ex)

@@ -9,9 +9,7 @@ namespace Tests.ServiceNow;
 [TestClass]
 public class ArticleActionTests : TestBase
 {
-    // Known demo article on the test instance (KB0000024 "Create An Email Signature").
     private const string KnownArticleId = "207de43187032100deddb882a2e3ec7a";
-    // Knowledge base "Knowledge".
     private const string KnowledgeBaseId = "dfc19531bf2021003f07e2c1ac0739ab";
 
     private ArticleActions Actions => new(InvocationContext, FileManager);
@@ -97,7 +95,6 @@ public class ArticleActionTests : TestBase
     [TestMethod]
     public async Task Roundtrip_DownloadThenUpload_WritesTranslatedFieldsBack()
     {
-        // Download the source article to a self-describing file...
         var downloaded = await Actions.DownloadArticle(new DownloadArticleRequest
         {
             ContentId = KnownArticleId,
@@ -105,7 +102,6 @@ public class ArticleActionTests : TestBase
         });
         Assert.IsNotNull(downloaded.Content);
 
-        // ...then feed that same file back into upload (targeting the same record).
         var result = await Actions.UploadArticle(new UploadArticleRequest
         {
             Content = downloaded.Content,

@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 
 namespace Apps.ServiceNow.Utils;
 
-/// <summary>Turns an article title (or a fallback id) into a safe file-name stem.</summary>
 public static class FileNameSanitizer
 {
     private const int MaxLength = 120;

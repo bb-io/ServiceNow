@@ -2,7 +2,6 @@ using Newtonsoft.Json;
 
 namespace Apps.ServiceNow.Models.Dtos;
 
-/// <summary>A single article entry inside a KM search response.</summary>
 public class KmSearchArticleDto
 {
     [JsonProperty("id")] public string? Id { get; set; }
@@ -12,7 +11,6 @@ public class KmSearchArticleDto
     [JsonProperty("score")] public double Score { get; set; }
 }
 
-/// <summary>The result block of a KM search response: {"result":{"meta":{...},"articles":[...]}}</summary>
 public class KmSearchResultDto
 {
     [JsonProperty("meta")] public KmSearchMetaDto? Meta { get; set; }

@@ -2,7 +2,6 @@ using Newtonsoft.Json;
 
 namespace Apps.ServiceNow.Models.Dtos;
 
-/// <summary>Metadata for a record attachment from the Attachment API.</summary>
 public class AttachmentDto
 {
     [JsonProperty("sys_id")] public string SysId { get; set; } = string.Empty;

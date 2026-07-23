@@ -9,8 +9,6 @@ public class ArticleSearchItem
 
     public ArticleSearchItem(KmSearchArticleDto dto)
     {
-        // The KM API returns a composite id like "kb_knowledge:207de..."; strip the prefix so the
-        // sys_id can be reused by the other article actions.
         var id = dto.Id ?? string.Empty;
         var colon = id.IndexOf(':');
         ArticleId = colon >= 0 ? id[(colon + 1)..] : id;

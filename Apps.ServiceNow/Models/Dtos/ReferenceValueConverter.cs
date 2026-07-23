@@ -3,11 +3,6 @@ using Newtonsoft.Json.Linq;
 
 namespace Apps.ServiceNow.Models.Dtos;
 
-/// <summary>
-/// ServiceNow returns reference fields either as an object {"link","value"} (raw mode) or as a
-/// plain string — the display label with sysparm_display_value, or "" when the field is empty.
-/// This converter accepts both shapes so a reference DTO deserializes reliably.
-/// </summary>
 public class ReferenceValueConverter : JsonConverter<ReferenceValueDto?>
 {
     public override ReferenceValueDto? ReadJson(JsonReader reader, Type objectType,
