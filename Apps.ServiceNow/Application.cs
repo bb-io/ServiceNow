@@ -5,14 +5,18 @@ namespace Apps.ServiceNow;
 
 public class Application : IApplication, ICategoryProvider
 {
+    public string Name => "ServiceNow";
+
     public IEnumerable<ApplicationCategory> Categories
     {
-        get => [];
+        get =>
+        [
+            ApplicationCategory.ProjectManagementAndProductivity,
+            ApplicationCategory.TaskManagement,
+            ApplicationCategory.Cms
+        ];
         set { }
     }
 
-    public T GetInstance<T>()
-    {
-        throw new NotImplementedException();
-    }
+    public T GetInstance<T>() => throw new NotImplementedException();
 }

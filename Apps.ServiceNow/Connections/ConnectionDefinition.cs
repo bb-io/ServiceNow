@@ -10,16 +10,22 @@ public class ConnectionDefinition : IConnectionDefinition
     {
         new()
         {
-            Name = "Developer API key",
+            Name = "Basic authentication",
             AuthenticationType = ConnectionAuthenticationType.Undefined,
             ConnectionProperties = new List<ConnectionProperty>
             {
-                new(CredsNames.Token) { DisplayName = "API Token", Sensitive = true}
+                new(CredsNames.InstanceUrl)
+                {
+                    DisplayName = "Instance URL",
+                    Description = "The base address of your ServiceNow instance, for example https://your-instance.service-now.com"
+                },
+                new(CredsNames.Username) { DisplayName = "Username" },
+                new(CredsNames.Password) { DisplayName = "Password", Sensitive = true }
             }
         }
     };
 
     public IEnumerable<AuthenticationCredentialsProvider> CreateAuthorizationCredentialsProviders(
-        Dictionary<string, string> values) => values.Select(x => new AuthenticationCredentialsProvider(x.Key, x.Value)
-        ).ToList();
+        Dictionary<string, string> values) =>
+        values.Select(x => new AuthenticationCredentialsProvider(x.Key, x.Value)).ToList();
 }

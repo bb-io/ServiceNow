@@ -1,4 +1,6 @@
+using System.Net;
 using Apps.ServiceNow.Api;
+using Apps.ServiceNow.Constants;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Authentication;
 using Blackbird.Applications.Sdk.Common.Connections;
@@ -7,7 +9,8 @@ using RestSharp;
 
 namespace Apps.ServiceNow.Connections;
 
-public class ConnectionValidator(InvocationContext invocationContext) : BaseInvocable(invocationContext), IConnectionValidator
+public class ConnectionValidator(InvocationContext invocationContext)
+    : BaseInvocable(invocationContext), IConnectionValidator
 {
     public async ValueTask<ConnectionValidationResponse> ValidateConnection(
         IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders,
@@ -15,31 +18,37 @@ public class ConnectionValidator(InvocationContext invocationContext) : BaseInvo
     {
         try
         {
-            var client = new Client(authenticationCredentialsProviders);
-            var request = new RestRequest();
+            var client = new Client(authenticationCredentialsProviders.ToArray());
+            var request = new RestRequest(ApiEndpoints.KnowledgeArticles, Method.Get)
+                .AddQueryParameter("limit", "1");
 
             var response = await client.ExecuteAsync(request, cancellationToken);
 
-            // Typically you'll want to use the least complex way to validate if a connection is valid.
-            var isValid = response.StatusCode != System.Net.HttpStatusCode.Unauthorized;
+            if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
+                return new ConnectionValidationResponse
+                {
+                    IsValid = false,
+                    Message = "Authentication failed — check your username and password."
+                };
 
-            return new ConnectionValidationResponse
-            {
-                IsValid = isValid,
-                Message = isValid ? "Success" : (response.Content ?? response.ErrorMessage ?? response.StatusCode.ToString()),
-            };
+            // The request never reached a ServiceNow server (bad host / DNS / connection refused).
+            // A wrong instance URL is a user-fixable configuration problem, so mark it invalid.
+            if (response.ResponseStatus != ResponseStatus.Completed)
+                return new ConnectionValidationResponse
+                {
+                    IsValid = false,
+                    Message = "Could not reach the instance — check the instance URL. " +
+                              (response.ErrorMessage ?? string.Empty)
+                };
 
-        } 
-        catch(Exception ex)
-        {
-            InvocationContext.Logger?.LogError($"Connection validation failed: {ex.Message}", []);
-
-            return new()
-            {
-                IsValid = false,
-                Message = ex.Message
-            };
+            // Any other completed-but-non-success response (5xx, transient) is not a credentials
+            // problem, so the connection is not marked invalid.
+            return new ConnectionValidationResponse { IsValid = true, Message = "Success" };
         }
-
+        catch (Exception ex)
+        {
+            InvocationContext.Logger?.LogError($"[ServiceNow] Connection validation failed: {ex.Message}", []);
+            return new ConnectionValidationResponse { IsValid = false, Message = ex.Message };
+        }
     }
 }

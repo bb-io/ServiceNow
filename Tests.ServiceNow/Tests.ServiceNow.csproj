@@ -25,6 +25,14 @@
     <None Update="appsettings.json.example">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="TestFiles\Input\" />
+    <Folder Include="TestFiles\Output\" />
   </ItemGroup>
 
 </Project>
