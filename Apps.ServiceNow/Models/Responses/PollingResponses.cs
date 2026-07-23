@@ -1,5 +1,6 @@
 using Apps.ServiceNow.Models.Dtos;
 using Apps.ServiceNow.Utils;
+using Blackbird.Applications.SDK.Blueprints.Interfaces.CMS;
 using Blackbird.Applications.Sdk.Common;
 
 namespace Apps.ServiceNow.Models.Responses;
@@ -17,9 +18,9 @@ public class ArticleEventItem : ArticleMetadataResponse
     public string EventType { get; set; } = string.Empty;
 }
 
-public class ArticlesEventResponse
+public class ArticlesEventResponse : IMultiDownloadableContentOutput<ArticleEventItem>
 {
-    [Display("Articles")] public List<ArticleEventItem> Articles { get; set; } = new();
+    [Display("Articles")] public List<ArticleEventItem> Items { get; set; } = new();
     [Display("Total count", Description = "The number of articles in this event.")] public int TotalCount { get; set; }
 }
 

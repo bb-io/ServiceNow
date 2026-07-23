@@ -39,8 +39,8 @@ public class PollingEventTests : TestBase
         if (result.FlyBird)
         {
             Assert.IsNotNull(result.Result);
-            Assert.IsTrue(result.Result!.Articles.Count > 0);
-            foreach (var a in result.Result.Articles.Take(5))
+            Assert.IsTrue(result.Result!.Items.Count > 0);
+            foreach (var a in result.Result.Items.Take(5))
                 Console.WriteLine($"[{a.EventType}] {a.Number}: {a.Title} ({a.State})");
         }
     }

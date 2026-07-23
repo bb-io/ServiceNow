@@ -1,16 +1,17 @@
 using Apps.ServiceNow.Models.Dtos;
 using Apps.ServiceNow.Utils;
+using Blackbird.Applications.SDK.Blueprints.Interfaces.CMS;
 using Blackbird.Applications.Sdk.Common;
 
 namespace Apps.ServiceNow.Models.Responses;
 
-public class ArticleMetadataResponse
+public class ArticleMetadataResponse : IDownloadContentInput
 {
     public ArticleMetadataResponse() { }
 
     public ArticleMetadataResponse(ArticleDto dto)
     {
-        ArticleId = dto.SysId;
+        ContentId = dto.SysId;
         Number = dto.Number;
         Title = dto.ShortDescription ?? string.Empty;
         State = dto.WorkflowState ?? string.Empty;
@@ -24,7 +25,7 @@ public class ArticleMetadataResponse
         UpdatedAt = ServiceNowDate.Parse(dto.UpdatedOn);
     }
 
-    [Display("Article ID")] public string ArticleId { get; set; } = string.Empty;
+    [Display("Article ID")] public string ContentId { get; set; } = string.Empty;
     [Display("Number", Description = "The human-readable article number, for example KB0000024.")] public string Number { get; set; } = string.Empty;
     [Display("Title")] public string Title { get; set; } = string.Empty;
     [Display("State", Description = "The workflow state, for example published or draft.")] public string State { get; set; } = string.Empty;

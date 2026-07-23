@@ -4,6 +4,7 @@ using Apps.ServiceNow.Models.Polling;
 using Apps.ServiceNow.Models.Requests;
 using Apps.ServiceNow.Models.Responses;
 using Apps.ServiceNow.Utils;
+using Blackbird.Applications.SDK.Blueprints;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.Sdk.Common.Polling;
 
@@ -16,6 +17,7 @@ public class ArticlePollingList(InvocationContext invocationContext) : Invocable
 
     private const string StatusFields = "sys_id,number,short_description,workflow_state,language,kb_knowledge_base,sys_updated_on";
 
+    [BlueprintEventDefinition(BlueprintEvent.ContentCreatedOrUpdatedMultiple)]
     [PollingEvent("On articles created or updated",
         Description = "Triggered on an interval and outputs the knowledge articles created or updated since the previous poll.")]
     public async Task<PollingEventResponse<PollingMemory, ArticlesEventResponse>> OnArticlesCreatedOrUpdated(
@@ -48,7 +50,7 @@ public class ArticlePollingList(InvocationContext invocationContext) : Invocable
             FlyBird = items.Count > 0,
             Memory = new PollingMemory { LastPollingTime = DateTime.UtcNow },
             Result = items.Count > 0
-                ? new ArticlesEventResponse { Articles = items, TotalCount = items.Count }
+                ? new ArticlesEventResponse { Items = items, TotalCount = items.Count }
                 : null
         };
     }

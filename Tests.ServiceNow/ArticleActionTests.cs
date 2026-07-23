@@ -40,7 +40,7 @@ public class ArticleActionTests : TestBase
     {
         var result = await Actions.GetArticleMetadata(new ArticleIdentifier { ArticleId = KnownArticleId });
         Console.WriteLine($"{result.Number}: {result.Title} [{result.State}]");
-        Assert.AreEqual(KnownArticleId, result.ArticleId);
+        Assert.AreEqual(KnownArticleId, result.ContentId);
         Assert.IsFalse(string.IsNullOrWhiteSpace(result.Number));
     }
 
