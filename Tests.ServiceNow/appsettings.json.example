@@ -1,0 +1,8 @@
+{
+  "ConnectionDefinition": {
+    "instance_url": "",
+    "username": "",
+    "password": ""
+  },
+  "TestFolder": "TestFiles"
+}

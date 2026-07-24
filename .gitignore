@@ -367,3 +367,8 @@ MigrationBackup/
 FodyWeavers.xsd
 
 */appsettings.json
+/Tests.ServiceNow/TestFiles/Output
+.claude
+.investigation
+initial_data.md
+investigation_results.md
