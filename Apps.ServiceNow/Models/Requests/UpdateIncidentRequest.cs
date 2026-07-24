@@ -32,7 +32,7 @@ public class UpdateIncidentRequest
 
     [Display("Impact", Description = "The new impact of the incident.")]
     [StaticDataSource(typeof(ImpactDataHandler))]
-    public string? Impact { get; set; }
+    public string? Impact { get; set; } 
 
     [Display("Assigned to ID", Description = "The user the incident is assigned to.")]
     [DataSource(typeof(UserDataHandler))]
