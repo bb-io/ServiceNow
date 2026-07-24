@@ -5,8 +5,12 @@ using Blackbird.Applications.Sdk.Common.Dynamic;
 
 namespace Apps.ServiceNow.Models.Requests;
 
-public class UpdateArticleRequest : ArticleIdentifier
+public class UpdateArticleRequest
 {
+    [Display("Article ID", Description = "The knowledge article to use.")]
+    [DataSource(typeof(ArticleDataHandler))]
+    public string ArticleId { get; set; } = string.Empty;
+    
     [Display("Title", Description = "A new title for the article.")]
     public string? Title { get; set; }
 

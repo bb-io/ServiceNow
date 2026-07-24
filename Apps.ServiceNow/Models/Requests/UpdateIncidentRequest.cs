@@ -7,8 +7,11 @@ using Blackbird.Applications.Sdk.Common.Dynamic;
 
 namespace Apps.ServiceNow.Models.Requests;
 
-public class UpdateIncidentRequest : IncidentIdentifier
-{
+public class UpdateIncidentRequest
+{    
+    [Display("Incident ID", Description = "The unique identifier (sys_id) of the incident.")]
+    public string IncidentId { get; set; } = string.Empty;
+    
     [Display("Short description", Description = "A new short summary of the incident.")]
     public string? ShortDescription { get; set; }
 
