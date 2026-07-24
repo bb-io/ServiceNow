@@ -37,23 +37,6 @@ public partial class Client : BlackBirdRestClient
             ? null
             : $"{InstanceBaseUrl.ToString().TrimEnd('/')}/kb_view.do?sysparm_article={number}";
 
-    private static Uri GetBaseUrl(IEnumerable<AuthenticationCredentialsProvider> creds)
-    {
-        var raw = creds.Get(CredsNames.InstanceUrl).Value?.Trim().TrimEnd('/');
-        if (string.IsNullOrWhiteSpace(raw))
-            throw new PluginMisconfigurationException(
-                "The instance URL is empty. Please fill in the 'Instance URL' field of the connection, for example https://your-instance.service-now.com");
-
-        if (!raw.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-            raw = $"https://{raw}";
-
-        if (!Uri.TryCreate(raw, UriKind.Absolute, out var uri))
-            throw new PluginMisconfigurationException(
-                $"The instance URL '{raw}' is not a valid address. Use the form https://your-instance.service-now.com");
-
-        return uri;
-    }
-
     protected override Exception ConfigureErrorException(RestResponse response)
     {
         var message = ExtractErrorMessage(response);
@@ -87,5 +70,22 @@ public partial class Client : BlackBirdRestClient
         {
             return response.Content;
         }
+    }
+    
+    private static Uri GetBaseUrl(IEnumerable<AuthenticationCredentialsProvider> creds)
+    {
+        var raw = creds.Get(CredsNames.InstanceUrl).Value?.Trim().TrimEnd('/');
+        if (string.IsNullOrWhiteSpace(raw))
+            throw new PluginMisconfigurationException(
+                "The instance URL is empty. Please fill in the 'Instance URL' field of the connection, for example https://your-instance.service-now.com");
+
+        if (!raw.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            raw = $"https://{raw}";
+
+        if (!Uri.TryCreate(raw, UriKind.Absolute, out var uri))
+            throw new PluginMisconfigurationException(
+                $"The instance URL '{raw}' is not a valid address. Use the form https://your-instance.service-now.com");
+
+        return uri;
     }
 }

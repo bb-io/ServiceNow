@@ -25,6 +25,7 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
     : Invocable(invocationContext)
 {
     private const string MetadataFields = TableFields.Article;
+    private const string RoundtripFields = "sys_id,number,short_description,text,language,workflow_state";
 
     [Action("Search articles", Description = "Find knowledge articles matching a search text and optional filters.")]
     public async Task<SearchArticlesResponse> SearchArticles([ActionParameter] SearchArticlesRequest request)
@@ -92,8 +93,6 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
             new Dictionary<string, string> { ["sysparm_fields"] = MetadataFields });
         return new ArticleMetadataResponse(dto);
     }
-
-    private const string RoundtripFields = "sys_id,number,short_description,text,language,workflow_state";
 
     [BlueprintActionDefinition(BlueprintAction.DownloadContent)]
     [Action("Download article", Description = "Export an article's translatable fields (title and body) as a self-describing HTML file ready for translation.")]
@@ -190,6 +189,29 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
         }
 
         return await BuildUploadOutput(input, loadResult, parsed, errors);
+    }
+    
+    [Action("Create article", Description = "Create a new knowledge article with a title and optional HTML body.")]
+    public async Task<CreateArticleResponse> CreateArticle([ActionParameter] CreateArticleRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Language))
+            throw new PluginMisconfigurationException("Please select a value for 'Language'.");
+        if (string.IsNullOrWhiteSpace(request.Title))
+            throw new PluginMisconfigurationException("Please fill in the 'Title' field.");
+        if (string.IsNullOrWhiteSpace(request.KnowledgeBaseId))
+            throw new PluginMisconfigurationException("Please select a value for 'Knowledge base ID'.");
+
+        var body = new Dictionary<string, object>
+        {
+            ["language"] = request.Language,
+            ["short_description"] = request.Title,
+            ["kb_knowledge_base"] = request.KnowledgeBaseId
+        };
+        if (request.Content is not null) body["text"] = request.Content;
+
+        var dto = await Client.CreateRecordAsync<ArticleDto>(ApiEndpoints.KnowledgeTable, body,
+            new Dictionary<string, string> { ["sysparm_fields"] = "sys_id,number,short_description,workflow_state" });
+        return new CreateArticleResponse(dto);
     }
 
     private async Task ApplyTranslatedFields(string articleId, ParsedEntry entry)
@@ -288,29 +310,6 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
         catch
         {
         }
-    }
-
-    [Action("Create article", Description = "Create a new knowledge article with a title and optional HTML body.")]
-    public async Task<CreateArticleResponse> CreateArticle([ActionParameter] CreateArticleRequest request)
-    {
-        if (string.IsNullOrWhiteSpace(request.Language))
-            throw new PluginMisconfigurationException("Please select a value for 'Language'.");
-        if (string.IsNullOrWhiteSpace(request.Title))
-            throw new PluginMisconfigurationException("Please fill in the 'Title' field.");
-        if (string.IsNullOrWhiteSpace(request.KnowledgeBaseId))
-            throw new PluginMisconfigurationException("Please select a value for 'Knowledge base ID'.");
-
-        var body = new Dictionary<string, object>
-        {
-            ["language"] = request.Language,
-            ["short_description"] = request.Title,
-            ["kb_knowledge_base"] = request.KnowledgeBaseId
-        };
-        if (request.Content is not null) body["text"] = request.Content;
-
-        var dto = await Client.CreateRecordAsync<ArticleDto>(ApiEndpoints.KnowledgeTable, body,
-            new Dictionary<string, string> { ["sysparm_fields"] = "sys_id,number,short_description,workflow_state" });
-        return new CreateArticleResponse(dto);
     }
 
     private static void ValidateArticleId(string articleId)
