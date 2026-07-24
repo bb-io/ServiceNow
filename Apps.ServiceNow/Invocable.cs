@@ -1,9 +1,7 @@
 using Apps.ServiceNow.Api;
-using Apps.ServiceNow.Models.Polling;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Authentication;
 using Blackbird.Applications.Sdk.Common.Invocation;
-using Blackbird.Applications.Sdk.Common.Polling;
 
 namespace Apps.ServiceNow;
 
@@ -18,12 +16,4 @@ public class Invocable : BaseInvocable
     {
         Client = new(Creds);
     }
-
-    protected static PollingEventResponse<PollingMemory, TResult> Baseline<TResult>() where TResult : class =>
-        new()
-        {
-            FlyBird = false,
-            Memory = new PollingMemory { LastPollingTime = DateTime.UtcNow },
-            Result = null
-        };
 }

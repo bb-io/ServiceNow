@@ -1,4 +1,5 @@
 using Apps.ServiceNow.Constants;
+using Apps.ServiceNow.Extensions;
 using Apps.ServiceNow.Models.Dtos;
 using Apps.ServiceNow.Models.Identifiers;
 using Apps.ServiceNow.Models.Requests;
@@ -21,12 +22,12 @@ public class IncidentActions(InvocationContext invocationContext) : Invocable(in
         if (string.IsNullOrWhiteSpace(request.ShortDescription))
             throw new PluginMisconfigurationException("Please fill in the 'Short description' field.");
 
-        var body = new Dictionary<string, object> { ["short_description"] = request.ShortDescription };
-        if (request.Description is not null) body["description"] = request.Description;
-        if (!string.IsNullOrWhiteSpace(request.Urgency)) body["urgency"] = request.Urgency;
-        if (!string.IsNullOrWhiteSpace(request.Impact)) body["impact"] = request.Impact;
-        if (!string.IsNullOrWhiteSpace(request.CallerId)) body["caller_id"] = request.CallerId;
-        if (!string.IsNullOrWhiteSpace(request.AssignedToId)) body["assigned_to"] = request.AssignedToId;
+        var body = new Dictionary<string, object> { ["short_description"] = request.ShortDescription }
+            .AddIfNotNull("description", request.Description)
+            .AddIfNotEmpty("urgency", request.Urgency)
+            .AddIfNotEmpty("impact", request.Impact)
+            .AddIfNotEmpty("caller_id", request.CallerId)
+            .AddIfNotEmpty("assigned_to", request.AssignedToId);
 
         var dto = await Client.CreateRecordAsync<IncidentDto>(ApiEndpoints.IncidentTable, body,
             new Dictionary<string, string> { ["sysparm_fields"] = IncidentFields });
@@ -47,14 +48,14 @@ public class IncidentActions(InvocationContext invocationContext) : Invocable(in
     {
         ValidateIncidentId(request.IncidentId);
 
-        var body = new Dictionary<string, object>();
-        if (request.ShortDescription is not null) body["short_description"] = request.ShortDescription;
-        if (request.Description is not null) body["description"] = request.Description;
-        if (!string.IsNullOrWhiteSpace(request.State)) body["state"] = request.State;
-        if (!string.IsNullOrWhiteSpace(request.Priority)) body["priority"] = request.Priority;
-        if (!string.IsNullOrWhiteSpace(request.Urgency)) body["urgency"] = request.Urgency;
-        if (!string.IsNullOrWhiteSpace(request.Impact)) body["impact"] = request.Impact;
-        if (!string.IsNullOrWhiteSpace(request.AssignedToId)) body["assigned_to"] = request.AssignedToId;
+        var body = new Dictionary<string, object>()
+            .AddIfNotNull("short_description", request.ShortDescription)
+            .AddIfNotNull("description", request.Description)
+            .AddIfNotEmpty("state", request.State)
+            .AddIfNotEmpty("priority", request.Priority)
+            .AddIfNotEmpty("urgency", request.Urgency)
+            .AddIfNotEmpty("impact", request.Impact)
+            .AddIfNotEmpty("assigned_to", request.AssignedToId);
 
         if (body.Count == 0)
             throw new PluginMisconfigurationException(

@@ -25,7 +25,6 @@ public class LanguageDataHandler(InvocationContext invocationContext)
             .Where(x => string.IsNullOrWhiteSpace(context.SearchString)
                         || x.Name!.Contains(context.SearchString, StringComparison.OrdinalIgnoreCase)
                         || x.Id!.Contains(context.SearchString, StringComparison.OrdinalIgnoreCase))
-            .Take(50)
             .Select(x => new DataSourceItem(x.Id!, x.Name!));
     }
 }

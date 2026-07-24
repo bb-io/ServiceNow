@@ -37,9 +37,3 @@ public class IncidentResponse
     [Display("Created at")] public DateTime? CreatedAt { get; set; }
     [Display("Updated at")] public DateTime? UpdatedAt { get; set; }
 }
-
-public class SearchIncidentsResponse
-{
-    [Display("Incidents")] public List<IncidentResponse> Incidents { get; set; } = new();
-    [Display("Total count", Description = "The number of incidents returned.")] public int TotalCount { get; set; }
-}

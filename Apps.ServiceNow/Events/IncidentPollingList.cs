@@ -19,7 +19,7 @@ public class IncidentPollingList(InvocationContext invocationContext) : Invocabl
         PollingEventRequest<PollingMemory> request)
     {
         if (request.Memory?.LastPollingTime is null)
-            return Baseline<IncidentsEventResponse>();
+            return PollingBaseline.Create<IncidentsEventResponse>();
 
         var since = request.Memory.LastPollingTime.Value;
 
@@ -48,7 +48,7 @@ public class IncidentPollingList(InvocationContext invocationContext) : Invocabl
         PollingEventRequest<PollingMemory> request)
     {
         if (request.Memory?.LastPollingTime is null)
-            return Baseline<IncidentCommentsEventResponse>();
+            return PollingBaseline.Create<IncidentCommentsEventResponse>();
 
         var since = request.Memory.LastPollingTime.Value;
 

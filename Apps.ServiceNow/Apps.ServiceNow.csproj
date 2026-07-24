@@ -19,6 +19,8 @@
 
     <ItemGroup>
         <EmbeddedResource CopyToOutputDirectory="Always" Include="image\icon.png" />
+        <EmbeddedResource CopyToOutputDirectory="Always" Include="..\README.md" Link="README.md" />
+        <EmbeddedResource CopyToOutputDirectory="Always" Include="..\image\README\**\*.*" Link="image\README\%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 
 </Project>

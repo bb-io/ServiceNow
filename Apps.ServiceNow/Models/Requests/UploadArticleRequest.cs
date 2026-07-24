@@ -8,7 +8,7 @@ namespace Apps.ServiceNow.Models.Requests;
 
 public class UploadArticleRequest : IUploadContentInput
 {
-    [Display("File", Description = "The translated file to import. Supports .html, .xliff and .xlf produced by the 'Download article' action.")]
+    [Display("File", Description = "The translated file to import. Supports files produced by the 'Download article' action.")]
     public FileReference Content { get; set; } = default!;
 
     [Display("Language", Description = "The language of the translation being uploaded.")]

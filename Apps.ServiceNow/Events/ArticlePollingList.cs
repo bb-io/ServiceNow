@@ -19,13 +19,13 @@ public class ArticlePollingList(InvocationContext invocationContext) : Invocable
 
     [BlueprintEventDefinition(BlueprintEvent.ContentCreatedOrUpdatedMultiple)]
     [PollingEvent("On articles created or updated",
-        Description = "Triggered on an interval and outputs the knowledge articles created or updated since the previous poll.")]
+        Description = "Triggered on an interval and outputs the knowledge articles created or updated.")]
     public async Task<PollingEventResponse<PollingMemory, ArticlesEventResponse>> OnArticlesCreatedOrUpdated(
         PollingEventRequest<PollingMemory> request,
         [PollingEventParameter] ArticleCreatedOrUpdatedFilter filter)
     {
         if (request.Memory?.LastPollingTime is null)
-            return Baseline<ArticlesEventResponse>();
+            return PollingBaseline.Create<ArticlesEventResponse>();
 
         var since = request.Memory.LastPollingTime.Value;
 

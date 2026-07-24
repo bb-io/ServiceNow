@@ -1,6 +1,7 @@
 using System.Net.Mime;
 using System.Text;
 using Apps.ServiceNow.Constants;
+using Apps.ServiceNow.Extensions;
 using Apps.ServiceNow.Models.Content;
 using Apps.ServiceNow.Models.Dtos;
 using Apps.ServiceNow.Models.Identifiers;
@@ -78,12 +79,12 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
     {
         ValidateArticleId(request.ArticleId);
 
-        var body = new Dictionary<string, object>();
-        if (request.Title is not null) body["short_description"] = request.Title;
-        if (request.Body is not null) body["text"] = request.Body;
-        if (!string.IsNullOrWhiteSpace(request.KnowledgeBaseId)) body["kb_knowledge_base"] = request.KnowledgeBaseId;
-        if (!string.IsNullOrWhiteSpace(request.CategoryId)) body["kb_category"] = request.CategoryId;
-        if (!string.IsNullOrWhiteSpace(request.Language)) body["language"] = request.Language;
+        var body = new Dictionary<string, object>()
+            .AddIfNotNull("short_description", request.Title)
+            .AddIfNotNull("text", request.Body)
+            .AddIfNotEmpty("kb_knowledge_base", request.KnowledgeBaseId)
+            .AddIfNotEmpty("kb_category", request.CategoryId)
+            .AddIfNotEmpty("language", request.Language);
 
         if (body.Count == 0)
             throw new PluginMisconfigurationException(
@@ -133,7 +134,7 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
     public async Task<DownloadContentOutput> UploadArticle([ActionParameter] UploadArticleRequest input)
     {
         if (input.Content is null)
-            throw new PluginMisconfigurationException("Please provide a file for 'File'.");
+            throw new PluginMisconfigurationException("Please provide a file in the 'File' input");
 
         var name = input.Content.Name ?? string.Empty;
         if (!name.EndsWith(".html", StringComparison.OrdinalIgnoreCase)
@@ -206,8 +207,7 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
             ["language"] = request.Language,
             ["short_description"] = request.Title,
             ["kb_knowledge_base"] = request.KnowledgeBaseId
-        };
-        if (request.Content is not null) body["text"] = request.Content;
+        }.AddIfNotNull("text", request.Content);
 
         var dto = await Client.CreateRecordAsync<ArticleDto>(ApiEndpoints.KnowledgeTable, body,
             new Dictionary<string, string> { ["sysparm_fields"] = "sys_id,number,short_description,workflow_state" });

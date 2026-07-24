@@ -20,7 +20,6 @@ public class ArticleMetadataResponse : IDownloadContentInput
         AuthorId = dto.Author?.Value ?? string.Empty;
         Language = dto.Language ?? string.Empty;
         ArticleType = dto.ArticleType ?? string.Empty;
-        Body = dto.Text ?? string.Empty;
         CreatedAt = ServiceNowDate.Parse(dto.CreatedOn);
         UpdatedAt = ServiceNowDate.Parse(dto.UpdatedOn);
     }
@@ -34,7 +33,6 @@ public class ArticleMetadataResponse : IDownloadContentInput
     [Display("Author ID")] public string AuthorId { get; set; } = string.Empty;
     [Display("Language")] public string Language { get; set; } = string.Empty;
     [Display("Article type")] public string ArticleType { get; set; } = string.Empty;
-    [Display("Body (HTML)")] public string Body { get; set; } = string.Empty;
     [Display("Created at")] public DateTime? CreatedAt { get; set; }
     [Display("Updated at")] public DateTime? UpdatedAt { get; set; }
 }

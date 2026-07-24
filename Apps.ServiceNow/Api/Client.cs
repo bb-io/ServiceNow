@@ -55,6 +55,8 @@ public partial class Client : BlackBirdRestClient
         return new PluginApplicationException($"ServiceNow returned an error: {message}");
     }
 
+    private const int MaxRawErrorLength = 300;
+
     private static string ExtractErrorMessage(RestResponse response)
     {
         if (string.IsNullOrWhiteSpace(response.Content))
@@ -64,13 +66,17 @@ public partial class Client : BlackBirdRestClient
         {
             var error = JsonConvert.DeserializeObject<ErrorDto>(response.Content);
             var text = error?.FirstNonEmpty();
-            return string.IsNullOrWhiteSpace(text) ? response.Content : text;
+            return string.IsNullOrWhiteSpace(text) ? Truncate(response.Content) : text;
         }
         catch (JsonException)
         {
-            return response.Content;
+            // Not JSON (e.g. an HTML error page). Cap the length so we never surface a wall of markup to the user.
+            return Truncate(response.Content);
         }
     }
+
+    private static string Truncate(string value) =>
+        value.Length <= MaxRawErrorLength ? value : value[..MaxRawErrorLength].TrimEnd() + "…";
     
     private static Uri GetBaseUrl(IEnumerable<AuthenticationCredentialsProvider> creds)
     {
