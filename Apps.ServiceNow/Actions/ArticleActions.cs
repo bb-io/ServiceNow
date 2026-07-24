@@ -31,12 +31,9 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
     [Action("Search articles", Description = "Find knowledge articles matching a search text and optional filters.")]
     public async Task<SearchArticlesResponse> SearchArticles([ActionParameter] SearchArticlesRequest request)
     {
-        var query = new Dictionary<string, string>();
-
-        if (!string.IsNullOrWhiteSpace(request.Query))
-            query["query"] = request.Query;
-        if (!string.IsNullOrWhiteSpace(request.Language))
-            query["language"] = request.Language;
+        var query = new Dictionary<string, string>()
+            .AddIfNotNull("query", request.Query)
+            .AddIfNotNull("language", request.Language);
 
         var kbIds = request.KnowledgeBaseIds?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
         if (kbIds is { Count: > 0 })
