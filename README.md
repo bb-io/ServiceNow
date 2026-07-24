@@ -46,6 +46,8 @@ A ServiceNow administrator can install it as follows:
 5. Click **Connect**.
 6. Confirm that the connection has appeared and the status is **Connected**.
 
+![Connection](image/README/connection.png)
+
 ## Actions
 
 ### Articles
