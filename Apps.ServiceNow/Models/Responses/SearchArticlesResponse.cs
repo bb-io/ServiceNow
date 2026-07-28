@@ -1,4 +1,5 @@
 using Apps.ServiceNow.Models.Dtos;
+using Apps.ServiceNow.Utils;
 using Blackbird.Applications.Sdk.Common;
 
 namespace Apps.ServiceNow.Models.Responses;
@@ -7,22 +8,28 @@ public class ArticleSearchItem
 {
     public ArticleSearchItem() { }
 
-    public ArticleSearchItem(KmSearchArticleDto dto)
+    public ArticleSearchItem(ArticleDto dto)
     {
-        var id = dto.Id ?? string.Empty;
-        var colon = id.IndexOf(':');
-        ArticleId = colon >= 0 ? id[(colon + 1)..] : id;
-        Number = dto.Number ?? string.Empty;
-        Title = dto.Title ?? string.Empty;
-        Snippet = dto.Snippet ?? string.Empty;
-        Score = dto.Score;
+        ArticleId = dto.SysId;
+        Number = dto.Number;
+        Title = dto.ShortDescription ?? string.Empty;
+        Snippet = HtmlPreview.Build(dto.Text);
+        Language = dto.Language ?? string.Empty;
+        State = dto.WorkflowState ?? string.Empty;
+        KnowledgeBaseId = dto.KnowledgeBase?.Value ?? string.Empty;
+        CreatedOn = ServiceNowDate.Parse(dto.CreatedOn);
+        UpdatedOn = ServiceNowDate.Parse(dto.UpdatedOn);
     }
 
     [Display("Article ID")] public string ArticleId { get; set; } = string.Empty;
     [Display("Number")] public string Number { get; set; } = string.Empty;
     [Display("Title")] public string Title { get; set; } = string.Empty;
-    [Display("Snippet", Description = "A short preview of the matching text.")] public string Snippet { get; set; } = string.Empty;
-    [Display("Score", Description = "Relevance score. -1 when no search text was supplied.")] public double Score { get; set; }
+    [Display("Snippet", Description = "A short plain-text preview of the article body.")] public string Snippet { get; set; } = string.Empty;
+    [Display("Language")] public string Language { get; set; } = string.Empty;
+    [Display("State", Description = "The workflow state, for example published or draft.")] public string State { get; set; } = string.Empty;
+    [Display("Knowledge base ID")] public string KnowledgeBaseId { get; set; } = string.Empty;
+    [Display("Created at", Description = "When the article was created (UTC).")] public DateTime? CreatedOn { get; set; }
+    [Display("Updated at", Description = "When the article was last updated (UTC).")] public DateTime? UpdatedOn { get; set; }
 }
 
 public class SearchArticlesResponse

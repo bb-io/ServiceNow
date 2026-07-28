@@ -19,6 +19,9 @@ public class ArticleCreatedOrUpdatedFilter
     [Display("Knowledge bases", Description = "Only trigger for articles that belong to one of the selected knowledge bases. Leave empty for any.")]
     [DataSource(typeof(KnowledgeBaseDataHandler))]
     public IEnumerable<string>? KnowledgeBaseIds { get; set; }
+
+    [Display("Ignore translations", Description = "Only trigger for source articles. ServiceNow stores every translation as its own article, so with this off a translation written by 'Upload article' also triggers this event, which makes a translation flow trigger on its own output.")]
+    public bool? IgnoreTranslations { get; set; }
 }
 
 public class ArticleStatusChangedFilter
@@ -38,4 +41,7 @@ public class ArticleStatusChangedFilter
     [Display("Status", Description = "Only trigger when an article changes into one of these states (for example Published). Leave empty to trigger on any status change.")]
     [StaticDataSource(typeof(ArticleStateDataHandler))]
     public IEnumerable<string>? Statuses { get; set; }
+
+    [Display("Ignore translations", Description = "Only watch source articles. ServiceNow stores every translation as its own article with its own workflow state, so with this off a translation's state changes trigger this event too.")]
+    public bool? IgnoreTranslations { get; set; }
 }

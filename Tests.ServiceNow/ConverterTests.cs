@@ -256,4 +256,23 @@ public class ConverterTests
 
     private static string? Meta(HtmlDocument doc, string name) =>
         doc.DocumentNode.SelectSingleNode($"//meta[@name='blackbird-{name}']")?.GetAttributeValue("content", "");
+
+    [TestMethod]
+    public void FormatUtc_LocalAndUtcKind_DescribeTheSameInstant()
+    {
+        var utc = new DateTime(2026, 7, 28, 9, 30, 0, DateTimeKind.Utc);
+
+        Assert.AreEqual("2026-07-28 09:30:00", ServiceNowDate.FormatUtc(utc));
+        Assert.AreEqual(ServiceNowDate.FormatUtc(utc), ServiceNowDate.FormatUtc(utc.ToLocalTime()),
+            "ServiceNow compares an encoded-query date against the stored UTC value, so a local kind must be converted.");
+    }
+
+    [TestMethod]
+    public void FormatUtc_UnspecifiedKind_IsTakenAsUtc()
+    {
+        var unspecified = new DateTime(2026, 7, 28, 9, 30, 0, DateTimeKind.Unspecified);
+
+        Assert.AreEqual("2026-07-28 09:30:00", ServiceNowDate.FormatUtc(unspecified),
+            "The date inputs are documented as UTC, so an unspecified kind must not be shifted.");
+    }
 }

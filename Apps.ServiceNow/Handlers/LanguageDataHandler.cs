@@ -14,7 +14,9 @@ public class LanguageDataHandler(InvocationContext invocationContext)
     {
         var query = new Dictionary<string, string>
         {
-            ["sysparm_query"] = "inactive=false",
+            // sys_language has an 'active' field and no 'inactive' one; an unknown field is ignored by ServiceNow,
+            // which is why this used to list every language the platform ships rather than the activated ones.
+            ["sysparm_query"] = "active=true",
             ["sysparm_fields"] = "name,id"
         };
 

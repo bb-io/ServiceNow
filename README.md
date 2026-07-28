@@ -52,11 +52,11 @@ A ServiceNow administrator can install it as follows:
 
 ### Articles
 
-- **Search articles** — Find knowledge articles matching a search text and optional filters (language, knowledge bases, state, and created/updated date ranges). Returns the matching articles with their ID, number, title, snippet and relevance score.
+- **Search articles** — Find knowledge articles matching a search text and optional filters (language, knowledge bases, state, and created/updated date ranges). Returns the matching articles with their ID, number, title, body preview, language, state, knowledge base and created/updated timestamps. Articles in every workflow state are searchable, drafts included.
 - **Get article metadata** — Read all metadata fields of a single article (title, state, knowledge base, category, author, language, body and timestamps).
 - **Update article metadata** — Change one or more fields of an article (title, body, knowledge base, category, language).
-- **Download article** — Get the fully rendered HTML body of an article as a file. Optionally choose a language version.
-- **Upload article** — Create a new article from a supplied HTML content file, in a chosen language and knowledge base. Optionally keep it as a draft.
+- **Download article** — Export an article's translatable fields (title and body) as a self-describing HTML file ready for translation.
+- **Upload article** — Import a translated file (`.html`/`.xliff`/`.xlf`) and write its title and body onto the article of the selected language.
 - **Create article** — Create a new article with a title, language, knowledge base and optional HTML body.
 
 > Note: newly created and updated articles are kept in the **draft** state. Publishing an article typically goes through your knowledge base's publish workflow and may require an approval, so the "Is draft = off" (publish) option is best-effort and depends on your instance configuration.

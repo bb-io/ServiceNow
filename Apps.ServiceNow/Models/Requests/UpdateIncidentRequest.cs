@@ -9,7 +9,8 @@ namespace Apps.ServiceNow.Models.Requests;
 
 public class UpdateIncidentRequest
 {    
-    [Display("Incident ID", Description = "The unique identifier (sys_id) of the incident.")]
+    [Display("Incident ID", Description = "The incident to update.")]
+    [DataSource(typeof(IncidentDataHandler))]
     public string IncidentId { get; set; } = string.Empty;
     
     [Display("Short description", Description = "A new short summary of the incident.")]
