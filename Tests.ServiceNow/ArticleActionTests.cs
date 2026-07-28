@@ -1,7 +1,11 @@
+using System.Net;
 using Apps.ServiceNow.Actions;
+using Apps.ServiceNow.Constants;
 using Apps.ServiceNow.Models.Identifiers;
 using Apps.ServiceNow.Models.Requests;
+using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Common.Files;
+using HtmlAgilityPack;
 using Tests.ServiceNow.Base;
 
 namespace Tests.ServiceNow;
@@ -17,7 +21,7 @@ public class ArticleActionTests : TestBase
     [TestMethod]
     public async Task SearchArticles_NoFilters_ReturnsResults()
     {
-        var result = await Actions.SearchArticles(new SearchArticlesRequest { Limit = 5 });
+        var result = await Actions.SearchArticles(new SearchArticlesRequest { Limit = 5, CreatedAfter = DateTime.Today.AddDays(-1) });
         Console.WriteLine($"Found {result.TotalCount} articles");
         foreach (var a in result.Articles)
             Console.WriteLine($"{a.Number}: {a.Title} ({a.ArticleId})");
@@ -111,5 +115,160 @@ public class ArticleActionTests : TestBase
         Console.WriteLine($"Upload root {result.RootEntryId}, errors {result.Errors?.Count ?? 0}");
         Assert.IsNotNull(result.Content);
         Assert.IsNull(result.Errors, "An unedited roundtrip should not produce per-article errors.");
+    }
+
+    [TestMethod]
+    public async Task SearchArticles_ReturnsCreatedAndUpdatedTimestamps()
+    {
+        var result = await Actions.SearchArticles(new SearchArticlesRequest { Limit = 5 });
+
+        Assert.IsTrue(result.Articles.Count > 0);
+        foreach (var a in result.Articles)
+            Console.WriteLine($"{a.Number} [{a.State}/{a.Language}] created {a.CreatedOn:u} updated {a.UpdatedOn:u}");
+
+        Assert.IsTrue(result.Articles.All(a => a.CreatedOn.HasValue), "Every hit should carry its creation date.");
+        Assert.IsTrue(result.Articles.All(a => a.UpdatedOn.HasValue), "Every hit should carry its update date.");
+    }
+
+    [TestMethod]
+    public async Task SearchArticles_CreatedAfter_ExcludesOlderArticles()
+    {
+        var cutoff = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        var all = await Actions.SearchArticles(new SearchArticlesRequest());
+        var filtered = await Actions.SearchArticles(new SearchArticlesRequest { CreatedAfter = cutoff });
+
+        Console.WriteLine($"{all.TotalCount} articles total, {filtered.TotalCount} created after {cutoff:u}");
+
+        Assert.IsTrue(filtered.TotalCount > 0, "The instance should hold articles created after the cutoff.");
+        Assert.IsTrue(filtered.TotalCount < all.TotalCount, "The date filter has to narrow the result set.");
+        Assert.IsTrue(filtered.Articles.All(a => a.CreatedOn >= cutoff),
+            "No article created before the cutoff may be returned.");
+    }
+
+    [TestMethod]
+    public async Task SearchArticles_CreatedBefore_ExcludesNewerArticles()
+    {
+        var cutoff = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        var filtered = await Actions.SearchArticles(new SearchArticlesRequest { CreatedBefore = cutoff });
+
+        Console.WriteLine($"{filtered.TotalCount} articles created before {cutoff:u}");
+        Assert.IsTrue(filtered.TotalCount > 0);
+        Assert.IsTrue(filtered.Articles.All(a => a.CreatedOn <= cutoff),
+            "No article created after the cutoff may be returned.");
+    }
+
+    [TestMethod]
+    public async Task SearchArticles_DraftState_ReturnsUnpublishedArticles()
+    {
+        var result = await Actions.SearchArticles(new SearchArticlesRequest { State = "draft", Limit = 10 });
+
+        Console.WriteLine($"Found {result.TotalCount} draft articles");
+        Assert.IsTrue(result.Articles.Count > 0,
+            "Drafts must be searchable; the KM search endpoint only ever returned published articles.");
+        Assert.IsTrue(result.Articles.All(a => a.State == "draft"));
+    }
+
+    [TestMethod]
+    public async Task UploadArticle_OtherLanguage_WritesToVariantAndLeavesSourceIntact()
+    {
+        const string germanTitle = "Blackbird Variantentest (DE)";
+        const string germanBody = "<p>Dies ist der <strong>deutsche</strong> Inhalt der Variante.</p>";
+
+        var source = await Actions.CreateArticle(new CreateArticleRequest
+        {
+            Language = "en",
+            Title = "Blackbird variant test article",
+            KnowledgeBaseId = KnowledgeBaseId,
+            Content = "<p>This is the <strong>English</strong> source content.</p>"
+        });
+
+        var downloaded = await Actions.DownloadArticle(new DownloadArticleRequest
+        {
+            ContentId = source.ArticleId,
+            Locale = "en"
+        });
+        var translated = TranslateDownloadedFile(downloaded.Content!, germanTitle, germanBody);
+
+        var upload = await Actions.UploadArticle(new UploadArticleRequest
+        {
+            Content = translated,
+            Locale = "de",
+            ContentId = source.ArticleId
+        });
+
+        Console.WriteLine($"root={upload.RootEntryId} target={upload.TargetEntryId}");
+        Assert.IsNull(upload.Errors, "The upload should not report per-article errors.");
+        Assert.AreNotEqual(source.ArticleId, upload.TargetEntryId,
+            "A German translation must land on its own article, not on the English source.");
+
+        var sourceAfter = await Actions.GetArticleMetadata(new ArticleIdentifier { ArticleId = source.ArticleId });
+        Assert.AreEqual("en", sourceAfter.Language, "The source article must keep its language.");
+        Assert.AreEqual("Blackbird variant test article", sourceAfter.Title,
+            "The source article's title must not be overwritten by the translation.");
+
+        var variant = await Actions.GetArticleMetadata(new ArticleIdentifier { ArticleId = upload.TargetEntryId });
+        Assert.AreEqual("de", variant.Language, "The written article must be the German variant.");
+        Assert.AreEqual(germanTitle, variant.Title);
+
+        // Uploading the same language a second time must reuse the variant rather than create another one.
+        var second = await Actions.UploadArticle(new UploadArticleRequest
+        {
+            Content = translated,
+            Locale = "de",
+            ContentId = source.ArticleId
+        });
+        Assert.AreEqual(upload.TargetEntryId, second.TargetEntryId,
+            "A second upload of the same language has to reuse the existing variant.");
+    }
+
+    [TestMethod]
+    public async Task UploadArticle_InactiveLanguage_ThrowsMisconfiguration()
+    {
+        var downloaded = await Actions.DownloadArticle(new DownloadArticleRequest
+        {
+            ContentId = KnownArticleId,
+            Locale = "en"
+        });
+        var file = TranslateDownloadedFile(downloaded.Content!, "titre", "<p>corps</p>");
+
+        var ex = await Assert.ThrowsExceptionAsync<PluginMisconfigurationException>(() =>
+            Actions.UploadArticle(new UploadArticleRequest
+            {
+                Content = file,
+                Locale = "fr",
+                ContentId = KnownArticleId
+            }));
+
+        Console.WriteLine(ex.Message);
+        StringAssert.Contains(ex.Message, "not an active language");
+    }
+
+    /// <summary>
+    /// Stands in for the external translation step: rewrites the downloaded file's field values and places it where
+    /// the test file manager reads uploads from.
+    /// </summary>
+    private FileReference TranslateDownloadedFile(FileReference downloaded, string title, string body)
+    {
+        var projectDirectory = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory)!.Parent!.Parent!.Parent!.FullName;
+        var html = File.ReadAllText(Path.Combine(projectDirectory, "TestFiles", "Output", downloaded.Name));
+
+        var doc = new HtmlDocument();
+        doc.LoadHtml(html);
+
+        foreach (var node in doc.DocumentNode.SelectNodes($"//*[@{RoundtripHtml.FieldIdAttr}]"))
+        {
+            var fieldId = node.GetAttributeValue(RoundtripHtml.FieldIdAttr, string.Empty);
+            if (fieldId == RoundtripHtml.TitleFieldId)
+                node.InnerHtml = WebUtility.HtmlEncode(title);
+            else if (fieldId == RoundtripHtml.BodyFieldId)
+                node.InnerHtml = body;
+        }
+
+        var name = $"translated_{downloaded.Name}";
+        File.WriteAllText(Path.Combine(projectDirectory, "TestFiles", "Input", name), doc.DocumentNode.OuterHtml);
+
+        return new FileReference { Name = name, ContentType = "text/html" };
     }
 }

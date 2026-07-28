@@ -1,6 +1,5 @@
 using Apps.ServiceNow.Constants;
 using Apps.ServiceNow.Models.Dtos;
-using Blackbird.Applications.Sdk.Common.Exceptions;
 using Newtonsoft.Json;
 using RestSharp;
 
@@ -69,43 +68,6 @@ public partial class Client
             offset += pageSize;
 
             if (total.HasValue && results.Count >= total.Value) break;
-            if (max.HasValue && results.Count >= max.Value) break;
-        }
-
-        return max.HasValue ? results.Take(max.Value).ToList() : results;
-    }
-
-    public async Task<List<KmSearchArticleDto>> SearchArticlesAsync(
-        IReadOnlyDictionary<string, string> query, int? max = null)
-    {
-        var results = new List<KmSearchArticleDto>();
-        var offset = 0;
-
-        while (true)
-        {
-            var pageSize = max.HasValue ? Math.Min(TablePageSize, max.Value - results.Count) : TablePageSize;
-            if (pageSize <= 0) break;
-
-            var request = new RestRequest(ApiEndpoints.KnowledgeArticles, Method.Get);
-            AddQuery(request, query);
-            request.AddQueryParameter("limit", pageSize.ToString());
-            request.AddQueryParameter("offset", offset.ToString());
-
-            var response = await ExecuteAsync(request);
-            if (!response.IsSuccessStatusCode)
-                throw ConfigureErrorException(response);
-
-            var result = JsonConvert.DeserializeObject<ResultWrapper<KmSearchResultDto>>(response.Content!)?.Result;
-            if (result?.ErrorMsg is { } err && !string.IsNullOrWhiteSpace(err))
-                throw new PluginMisconfigurationException($"ServiceNow could not run the search: {err}.");
-
-            var articles = result?.Articles ?? new List<KmSearchArticleDto>();
-            results.AddRange(articles);
-
-            var total = (int)Math.Round(result?.Meta?.Count ?? 0);
-            offset += pageSize;
-
-            if (articles.Count == 0 || results.Count >= total) break;
             if (max.HasValue && results.Count >= max.Value) break;
         }
 

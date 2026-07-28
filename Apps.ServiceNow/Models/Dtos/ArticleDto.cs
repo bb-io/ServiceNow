@@ -14,6 +14,11 @@ public class ArticleDto
     [JsonProperty("sys_created_on")] public string? CreatedOn { get; set; }
     [JsonProperty("sys_updated_on")] public string? UpdatedOn { get; set; }
 
+    /// <summary>Source article this record is a translation of. Empty on a source article.</summary>
+    [JsonProperty("parent")]
+    [JsonConverter(typeof(ReferenceValueConverter))]
+    public ReferenceValueDto? Parent { get; set; }
+
     [JsonProperty("kb_knowledge_base")]
     [JsonConverter(typeof(ReferenceValueConverter))]
     public ReferenceValueDto? KnowledgeBase { get; set; }

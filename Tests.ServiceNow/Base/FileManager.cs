@@ -25,8 +25,13 @@ public class FileManager : IFileManagementClient
 
     public Task<Stream> DownloadAsync(FileReference reference)
     {
+        // Fall back to the output folder so a file produced earlier in the same test (a download) can be read back,
+        // which is what the real file management client does.
         var path = Path.Combine(inputFolder, reference.Name);
-        Assert.IsTrue(File.Exists(path), $"File not found at: {path}");
+        if (!File.Exists(path))
+            path = Path.Combine(outputFolder, reference.Name);
+
+        Assert.IsTrue(File.Exists(path), $"File not found in {inputFolder} or {outputFolder}: {reference.Name}");
         var bytes = File.ReadAllBytes(path);
 
         var stream = new MemoryStream(bytes);
