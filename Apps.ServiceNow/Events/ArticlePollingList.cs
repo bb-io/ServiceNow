@@ -1,4 +1,4 @@
-using Apps.ServiceNow.Constants;
+﻿using Apps.ServiceNow.Constants;
 using Apps.ServiceNow.Models.Dtos;
 using Apps.ServiceNow.Models.Polling;
 using Apps.ServiceNow.Models.Requests;
@@ -27,9 +27,9 @@ public class ArticlePollingList(InvocationContext invocationContext) : Invocable
         if (request.Memory?.LastPollingTime is null)
             return PollingBaseline.Create<ArticlesEventResponse>();
 
-        var since = request.Memory.LastPollingTime.Value;
+        var since = ServiceNowDate.ToUtc(request.Memory.LastPollingTime.Value);
 
-        var clauses = BuildArticleScopeClauses(filter.ArticleId, filter.Language, filter.KnowledgeBaseIds);
+        var clauses = BuildArticleScopeClauses(filter.ArticleId, filter.Language, filter.KnowledgeBaseIds, filter.IgnoreTranslations);
         clauses.Add($"sys_updated_on>{ServiceNowDate.Format(since)}");
         clauses.Add("ORDERBYsys_updated_on");
 
@@ -61,7 +61,7 @@ public class ArticlePollingList(InvocationContext invocationContext) : Invocable
         PollingEventRequest<ArticleStatePollingMemory> request,
         [PollingEventParameter] ArticleStatusChangedFilter filter)
     {
-        var clauses = BuildArticleScopeClauses(filter.ArticleId, filter.Language, filter.KnowledgeBaseIds);
+        var clauses = BuildArticleScopeClauses(filter.ArticleId, filter.Language, filter.KnowledgeBaseIds, filter.IgnoreTranslations);
         var query = new Dictionary<string, string> { ["sysparm_fields"] = StatusFields };
         if (clauses.Count > 0)
             query["sysparm_query"] = string.Join("^", clauses);
@@ -110,7 +110,7 @@ public class ArticlePollingList(InvocationContext invocationContext) : Invocable
     }
 
     private static List<string> BuildArticleScopeClauses(
-        string? articleId, string? language, IEnumerable<string>? knowledgeBaseIds)
+        string? articleId, string? language, IEnumerable<string>? knowledgeBaseIds, bool? ignoreTranslations)
     {
         var clauses = new List<string>();
 
@@ -122,6 +122,10 @@ public class ArticlePollingList(InvocationContext invocationContext) : Invocable
         var kbIds = knowledgeBaseIds?.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
         if (kbIds is { Count: > 0 })
             clauses.Add($"kb_knowledge_baseIN{string.Join(",", kbIds)}");
+
+        // A translation is a kb_knowledge record whose 'parent' points at the article it was translated from.
+        if (ignoreTranslations == true)
+            clauses.Add("parentISEMPTY");
 
         return clauses;
     }

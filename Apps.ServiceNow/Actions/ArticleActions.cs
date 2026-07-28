@@ -34,8 +34,6 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
         if (request.Limit is <= 0)
             throw new PluginMisconfigurationException("The 'Maximum results' value must be greater than zero.");
 
-        // The kb_knowledge table is queried instead of the /sn_km_api search endpoint: that endpoint only ever
-        // surfaces published articles, so drafts and articles in review were invisible however the filters were set.
         var clauses = new List<string>();
 
         if (!string.IsNullOrWhiteSpace(request.Query))
@@ -58,8 +56,6 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
         if (request.UpdatedBefore.HasValue)
             clauses.Add($"sys_updated_on<={ServiceNowDate.FormatUtc(request.UpdatedBefore.Value)}");
 
-        // A text query is already ordered by relevance, so only impose an order of our own when there is none.
-        // ORDERBY has to be the last clause of an encoded query.
         if (string.IsNullOrWhiteSpace(request.Query))
             clauses.Add("ORDERBYDESCsys_updated_on");
 
@@ -204,19 +200,6 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
 
         return await BuildUploadOutput(input, loadResult, parsed, writtenIds.FirstOrDefault(), locale, errors);
     }
-
-    /// <summary>
-    /// The language the translation should be written in. Explicit input wins; a bilingual file can supply it
-    /// itself. Empty means "no language given", in which case the article addressed by the file is updated in place.
-    /// </summary>
-    private static string ResolveUploadLocale(UploadArticleRequest input, TransformationLoadResult loadResult)
-    {
-        if (!string.IsNullOrWhiteSpace(input.Locale))
-            return input.Locale;
-
-        var fromFile = loadResult.Success ? loadResult.Value.TargetLanguage : null;
-        return string.IsNullOrWhiteSpace(fromFile) ? string.Empty : fromFile;
-    }
     
     [Action("Create article", Description = "Create a new knowledge article with a title and optional HTML body.")]
     public async Task<CreateArticleResponse> CreateArticle([ActionParameter] CreateArticleRequest request)
@@ -239,13 +222,16 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
             new Dictionary<string, string> { ["sysparm_fields"] = "sys_id,number,short_description,workflow_state" });
         return new CreateArticleResponse(dto);
     }
+    
+    private static string ResolveUploadLocale(UploadArticleRequest input, TransformationLoadResult loadResult)
+    {
+        if (!string.IsNullOrWhiteSpace(input.Locale))
+            return input.Locale;
 
-    /// <summary>
-    /// Writes the translated fields onto the article that holds <paramref name="locale"/>. ServiceNow keeps every
-    /// language in its own kb_knowledge record, linked to the source article through 'parent', so the translation
-    /// must never be patched onto the source: the variant is looked up and created when it does not exist yet.
-    /// Returns the id of the article that was written.
-    /// </summary>
+        var fromFile = loadResult.Success ? loadResult.Value.TargetLanguage : null;
+        return string.IsNullOrWhiteSpace(fromFile) ? string.Empty : fromFile;
+    }
+    
     private async Task<string> ApplyTranslatedFields(string anchorId, ParsedEntry entry, string locale)
     {
         var anchor = await Client.GetRecordAsync<ArticleDto>(ApiEndpoints.KnowledgeTable, anchorId,
@@ -272,14 +258,9 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
 
         return variant.SysId;
     }
-
-    /// <summary>
-    /// Finds the record for <paramref name="locale"/> in the anchor's translation family, together with the source
-    /// article that owns the family. A null variant means the language does not exist yet.
-    /// </summary>
+    
     private async Task<(ArticleDto Source, ArticleDto? Variant)> ResolveLocaleVariant(ArticleDto anchor, string locale)
     {
-        // No language given, or the anchor already is that language: write in place.
         if (string.IsNullOrWhiteSpace(locale) || IsLocale(anchor.Language, locale))
             return (anchor, anchor);
 
@@ -287,7 +268,6 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
         var parentId = anchor.Parent?.Value;
         if (!string.IsNullOrWhiteSpace(parentId))
         {
-            // The anchor is itself a translation, so its parent owns the family.
             source = await Client.GetRecordAsync<ArticleDto>(ApiEndpoints.KnowledgeTable, parentId,
                 new Dictionary<string, string> { ["sysparm_fields"] = TableFields.ArticleVariant });
 
@@ -366,7 +346,6 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
         if (loadResult.Success)
         {
             var transformation = loadResult.Value;
-            // The target reference has to describe the language variant that was written, not the source article.
             await StampTargetReference(transformation, writtenArticleId ?? rootId, locale);
 
             if (loadResult.WasBilingual)

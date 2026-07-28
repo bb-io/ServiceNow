@@ -1,4 +1,4 @@
-using Apps.ServiceNow.Constants;
+﻿using Apps.ServiceNow.Constants;
 using Apps.ServiceNow.Models.Dtos;
 using Apps.ServiceNow.Models.Polling;
 using Apps.ServiceNow.Models.Responses;
@@ -21,7 +21,7 @@ public class IncidentPollingList(InvocationContext invocationContext) : Invocabl
         if (request.Memory?.LastPollingTime is null)
             return PollingBaseline.Create<IncidentsEventResponse>();
 
-        var since = request.Memory.LastPollingTime.Value;
+        var since = ServiceNowDate.ToUtc(request.Memory.LastPollingTime.Value);
 
         var query = new Dictionary<string, string>
         {
@@ -50,7 +50,7 @@ public class IncidentPollingList(InvocationContext invocationContext) : Invocabl
         if (request.Memory?.LastPollingTime is null)
             return PollingBaseline.Create<IncidentCommentsEventResponse>();
 
-        var since = request.Memory.LastPollingTime.Value;
+        var since = ServiceNowDate.ToUtc(request.Memory.LastPollingTime.Value);
 
         var query = new Dictionary<string, string>
         {

@@ -67,6 +67,8 @@ ServiceNow keeps every language of an article in its own `kb_knowledge` record, 
 
 **Upload article** follows that model: it writes into the record for the language you select, creating and linking that record to the source article the first time you upload a given language. The source article is never overwritten with translated content. The output exposes both the source article ID (`Root article ID`) and the language variant that was written (`Translated article ID`).
 
+Because a translation is its own article, **On articles created or updated** fires when *Upload article* writes one. In a flow that translates on that trigger, switch on **Ignore translations** (or set the **Language** filter to your source language) so the flow does not trigger on its own output.
+
 Only languages that are **active** on your instance can be used. ServiceNow silently falls back to the instance default for an inactive language code, so the action rejects one instead; activate the language under *System Localization → Languages* first. The **Language** inputs list only your active languages.
 
 ### Incidents
