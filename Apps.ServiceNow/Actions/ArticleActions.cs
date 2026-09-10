@@ -112,12 +112,15 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
             : !string.IsNullOrWhiteSpace(dto.Language) ? dto.Language!
             : "en";
 
+        string? articleBody = MediaHelper.ToAbsoluteUrls(dto.Text, Client.InstanceBaseUrl);
+        articleBody = await MediaHelper.InlineImages(articleBody, Client.InstanceBaseUrl, Client.DownloadAttachmentAsync);
+        
         var model = new ArticleHtmlModel
         {
             EntryId = dto.SysId,
             Locale = locale,
             Title = dto.ShortDescription,
-            Body = dto.Text,
+            Body = articleBody,
             AdminUrl = Client.GetArticleAdminUrl(dto.SysId),
             PublicUrl = Client.GetArticlePublicUrl(dto.Number),
             SystemRef = Client.InstanceBaseUrl.ToString().TrimEnd('/')
@@ -238,7 +241,16 @@ public class ArticleActions(InvocationContext invocationContext, IFileManagement
             new Dictionary<string, string> { ["sysparm_fields"] = TableFields.ArticleVariant });
 
         var title = FieldValue(entry, RoundtripHtml.TitleFieldId);
-        var body = FieldValue(entry, RoundtripHtml.BodyFieldId);
+        var body = MediaHelper.ToRelativeUrls(
+            MediaHelper.RestoreImageUrls(FieldValue(entry, RoundtripHtml.BodyFieldId)), 
+            Client.InstanceBaseUrl);
+        
+        if (MediaHelper.ContainsInlinedImages(body))
+        {
+            InvocationContext.Logger?.LogWarning(
+                "The uploaded file contains an embedded image that cannot be matched to a ServiceNow attachment", 
+                []);
+        }
 
         var (source, variant) = await ResolveLocaleVariant(anchor, locale);
         if (variant is null)

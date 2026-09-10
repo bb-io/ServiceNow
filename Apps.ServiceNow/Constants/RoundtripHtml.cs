@@ -8,6 +8,7 @@ public static class RoundtripHtml
     public const string FieldIdAttr = "data-servicenow-field-id";
     public const string FieldTypeAttr = "data-servicenow-field-type";
     public const string HtmlAttr = "data-servicenow-html";
+    public const string AttachmentIdAttr = "data-servicenow-attachment-id";
 
     public const string BlackbirdKeyAttr = "data-blackbird-key";
     public const string BlackbirdSizeAttr = "data-blackbird-size";
