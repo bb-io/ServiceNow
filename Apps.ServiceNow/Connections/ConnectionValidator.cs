@@ -19,8 +19,9 @@ public class ConnectionValidator(InvocationContext invocationContext)
         try
         {
             var client = new Client(authenticationCredentialsProviders.ToArray());
-            var request = new RestRequest(ApiEndpoints.KnowledgeArticles, Method.Get)
-                .AddQueryParameter("limit", "1");
+            var request = new RestRequest(ApiEndpoints.UserTable)
+                .AddQueryParameter("sysparm_limit", "1")
+                .AddQueryParameter("sysparm_fields", "sys_id");
 
             var response = await client.ExecuteAsync(request, cancellationToken);
 
