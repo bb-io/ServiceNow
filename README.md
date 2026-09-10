@@ -14,10 +14,13 @@ Before you can connect, you need:
 
 - A ServiceNow instance (for example `https://your-instance.service-now.com`).
 - The **Knowledge API** application (`sn_km_api`) installed on the instance. See [Installing the Knowledge API](#installing-the-knowledge-api).
-- A ServiceNow user account with permission to read and write knowledge articles
-  and incidents through the REST APIs (Table API, Knowledge Management API and Attachment API)
-  and with the `snc_basic_auth_api_access` role enabled.
+- A dedicated integration user (`sys_user_list.do`) with the roles `snc_basic_auth_api_access`,
+  `snc_platform_rest_api_access`, `knowledge`, `knowledge_admin` and `itil`.
 - The username and password of that account.
+
+> **Note**: An admin account will not work: ServiceNow blocks basic authentication for interactive users
+> and `snc_basic_auth_api_access` is the exception to that. 
+> Also make sure 'Password needs reset' is unchecked after setting the password.
 
 ## Installing the Knowledge API
 
