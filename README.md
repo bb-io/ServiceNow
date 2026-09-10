@@ -14,7 +14,9 @@ Before you can connect, you need:
 
 - A ServiceNow instance (for example `https://your-instance.service-now.com`).
 - The **Knowledge API** application (`sn_km_api`) installed on the instance. See [Installing the Knowledge API](#installing-the-knowledge-api).
-- A ServiceNow user account with permission to read and write knowledge articles and incidents through the REST APIs (Table API, Knowledge Management API and Attachment API).
+- A ServiceNow user account with permission to read and write knowledge articles
+  and incidents through the REST APIs (Table API, Knowledge Management API and Attachment API)
+  and with the `snc_basic_auth_api_access` role enabled.
 - The username and password of that account.
 
 ## Installing the Knowledge API
