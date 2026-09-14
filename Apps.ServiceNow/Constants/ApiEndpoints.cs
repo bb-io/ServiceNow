@@ -10,8 +10,7 @@ public static class ApiEndpoints
     public const string IncidentTable = $"{Table}/{TableNames.Incident}";
     public const string JournalTable = $"{Table}/{TableNames.Journal}";
     public const string AttachmentTable = $"{Table}/{TableNames.Attachment}";
-
-    public const string KnowledgeArticles = "/api/sn_km_api/knowledge/articles";
+    public const string LabelTable = $"{Table}/{TableNames.Label}";
 
     public const string Attachment = "/api/now/attachment";
 

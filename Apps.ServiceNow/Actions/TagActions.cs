@@ -1,3 +1,4 @@
+using Apps.ServiceNow.Constants;
 using Apps.ServiceNow.Models.Dtos;
 using Apps.ServiceNow.Models.Identifiers;
 using Apps.ServiceNow.Models.Requests.Tag;
@@ -15,16 +16,16 @@ public class TagActions(InvocationContext invocationContext) : Invocable(invocat
     [Action("Search tags", Description = "Search all available tags.")]
     public async Task<SearchTagsResponse> SearchTags([ActionParameter] SearchTagsRequest input)
     {
-        var query = new List<string> { "viewable_by=everyone" };
+        var queryDict = new Dictionary<string, string>
+        {
+            { "viewable_by", "everyone" },
+        };
         
         if (!string.IsNullOrEmpty(input.NameContains))
-            query.Add($"nameLIKE{input.NameContains}");
-        
-        var request = new RestRequest("/api/now/table/label").AddQueryParameter("sysparm_query", string.Join('^', query));
-        var response = await Client.ExecuteWithErrorHandling<ResultListWrapper<TagDto>>(request);
+            queryDict.Add("sysparm_query", $"nameLIKE{input.NameContains}");
 
-        var tags = response.Result.Select(x => new TagResponse(x)).ToArray();
-        return new(tags);
+        var response = await Client.SearchTableAsync<TagDto>(ApiEndpoints.LabelTable, queryDict);
+        return new(response.Select(x => new TagResponse(x)).ToArray());
     }
     
     [Action("Get tags", Description = "Get details for a specific tag.")]
@@ -35,4 +36,6 @@ public class TagActions(InvocationContext invocationContext) : Invocable(invocat
 
         return new(response.Result);
     }
+    
+    
 }
