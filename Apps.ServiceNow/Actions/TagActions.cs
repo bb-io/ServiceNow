@@ -1,4 +1,5 @@
 using Apps.ServiceNow.Models.Dtos;
+using Apps.ServiceNow.Models.Identifiers;
 using Apps.ServiceNow.Models.Requests.Tag;
 using Apps.ServiceNow.Models.Responses.Tag;
 using Blackbird.Applications.Sdk.Common;
@@ -11,7 +12,7 @@ namespace Apps.ServiceNow.Actions;
 [ActionList("Tags")]
 public class TagActions(InvocationContext invocationContext) : Invocable(invocationContext)
 {
-    [Action("Search tags", Description = "Search all available tags")]
+    [Action("Search tags", Description = "Search all available tags.")]
     public async Task<SearchTagsResponse> SearchTags([ActionParameter] SearchTagsRequest input)
     {
         var query = new List<string> { "viewable_by=everyone" };
@@ -24,5 +25,14 @@ public class TagActions(InvocationContext invocationContext) : Invocable(invocat
 
         var tags = response.Result.Select(x => new TagResponse(x)).ToArray();
         return new(tags);
+    }
+    
+    [Action("Get tags", Description = "Get details for a specific tag.")]
+    public async Task<TagResponse> GetTag([ActionParameter] TagIdentifier tagInput)
+    {
+        var request = new RestRequest($"/api/now/table/label/{tagInput.TagId}");
+        var response = await Client.ExecuteWithErrorHandling<ResultWrapper<TagDto>>(request);
+
+        return new(response.Result);
     }
 }

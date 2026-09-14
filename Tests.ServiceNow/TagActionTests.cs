@@ -1,4 +1,5 @@
 using Apps.ServiceNow.Actions;
+using Apps.ServiceNow.Models.Identifiers;
 using Apps.ServiceNow.Models.Requests.Tag;
 using Tests.ServiceNow.Base;
 
@@ -20,6 +21,20 @@ public class TagActionTests : TestBase
         
         // Act
         var result = await Actions.SearchTags(input);
+
+        // Assert
+        PrintJsonResult(result);
+        Assert.IsNotNull(result);
+    }
+
+    [TestMethod]
+    public async Task GetTag_ReturnsTag()
+    {
+        // Arrange
+        var tagInput = new TagIdentifier { TagId = "fed5da12471331007f47563dbb9a7184" };
+        
+        // Act
+        var result = await Actions.GetTag(tagInput);
 
         // Assert
         PrintJsonResult(result);

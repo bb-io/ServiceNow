@@ -8,7 +8,7 @@ public class TagDto
     public string SysId { get; set; } = string.Empty;
 
     [JsonProperty("name")]
-    public string Name { get; set; } = string.Empty;
+    public string? Name { get; set; }
 
     [JsonProperty("short_description")]
     public string? ShortDescription { get; set; }

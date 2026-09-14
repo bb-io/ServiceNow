@@ -9,7 +9,7 @@ public class TagResponse(TagDto dto)
     public string TagId { get; set; } = dto.SysId;
 
     [Display("Tag name")]
-    public string TagName { get; set; } = dto.Name;
+    public string? TagName { get; set; } = dto.Name;
 
     [Display("Tag short description")]
     public string? ShortDescription { get; set; } = dto.ShortDescription;

@@ -45,6 +45,20 @@ public class DataSourceTests : TestBase
     }
 
     [TestMethod]
+    public async Task TagHandler_ReturnsItems()
+    {
+        // Arrange
+        var handler = new TagDataHandler(InvocationContext);
+
+        // Act
+        var result = await handler.GetDataAsync(new DataSourceContext() { SearchString = "dev" }, CancellationToken.None);
+
+        // Assert
+        PrintJsonResult(result);
+        Assert.IsNotNull(result);
+    }
+
+    [TestMethod]
     public async Task IncidentHandler_ReturnsItems()
     {
         var handler = new IncidentDataHandler(InvocationContext);
