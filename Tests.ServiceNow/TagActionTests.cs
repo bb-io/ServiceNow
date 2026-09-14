@@ -1,6 +1,7 @@
 using Apps.ServiceNow.Actions;
 using Apps.ServiceNow.Models.Identifiers;
 using Apps.ServiceNow.Models.Requests.Tag;
+using Blackbird.Applications.Sdk.Common.Exceptions;
 using Tests.ServiceNow.Base;
 
 namespace Tests.ServiceNow;
@@ -56,5 +57,18 @@ public class TagActionTests : TestBase
         // Assert
         PrintJsonResult(result);
         Assert.IsNotNull(result);
+    }
+
+    [TestMethod]
+    public async Task DeleteTag_IsSuccess()
+    {
+        // Arrange
+        var tagInput = new TagIdentifier { TagId = "07aeb7b5935b0f106a23f41add03d662" };
+
+        // Act
+        await Actions.DeleteTag(tagInput);
+
+        // Assert
+        await Assert.ThrowsExceptionAsync<PluginMisconfigurationException>(() => Actions.GetTag(tagInput));
     }
 }

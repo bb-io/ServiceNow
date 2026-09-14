@@ -52,4 +52,10 @@ public class TagActions(InvocationContext invocationContext) : Invocable(invocat
         var dto = await Client.CreateRecordAsync<TagDto>(ApiEndpoints.LabelTable, body);
         return new(dto);
     }
+    
+    [Action("Delete tag", Description = "Delete an existing tag.")]
+    public async Task DeleteTag([ActionParameter] TagIdentifier tagInput)
+    {
+        await Client.DeleteRecordAsync(ApiEndpoints.LabelTable, tagInput.TagId);
+    }
 }
