@@ -15,7 +15,7 @@ Before you can connect, you need:
 - A ServiceNow instance (for example `https://your-instance.service-now.com`).
 - The **Knowledge API** application (`sn_km_api`) installed on the instance. See [Installing the Knowledge API](#installing-the-knowledge-api).
 - A dedicated integration user (`sys_user_list.do`) with the roles `snc_basic_auth_api_access`,
-  `snc_platform_rest_api_access`, `knowledge`, `knowledge_admin` and `itil`.
+  `snc_platform_rest_api_access`, `knowledge`, `knowledge_admin`, `tags_admin` and `itil`.
 - The username and password of that account.
 
 > **Note**: An admin account will not work: ServiceNow blocks basic authentication for interactive users
@@ -79,6 +79,13 @@ A ServiceNow administrator can install it as follows:
 ### Attachments
 
 - **Download attachment** — Download the file content of an attachment by its ID.
+
+### Tags
+
+- **Search tags** — Search all available tags.
+- **Get tags** — Get details for a specific tag.
+- **Create tag** — Create a new tag.
+- **Delete tag** — Delete an existing tag.
 
 ## Events
 
