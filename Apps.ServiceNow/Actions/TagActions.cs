@@ -1,4 +1,5 @@
 using Apps.ServiceNow.Constants;
+using Apps.ServiceNow.Extensions;
 using Apps.ServiceNow.Models.Dtos;
 using Apps.ServiceNow.Models.Identifiers;
 using Apps.ServiceNow.Models.Requests.Tag;
@@ -36,6 +37,19 @@ public class TagActions(InvocationContext invocationContext) : Invocable(invocat
 
         return new(response.Result);
     }
-    
-    
+
+    [Action("Create tag", Description = "Create a new tag.")]
+    public async Task<TagResponse> CreateTag([ActionParameter] CreateTagRequest createInput)
+    {
+        var body = new Dictionary<string, object>
+            {
+                ["name"] = createInput.TagName,
+                ["type"] = "standard",
+            }
+            .AddIfNotEmpty("short_description", createInput.ShortDescription)
+            .AddIfNotEmpty("color", createInput.Color);
+
+        var dto = await Client.CreateRecordAsync<TagDto>(ApiEndpoints.LabelTable, body);
+        return new(dto);
+    }
 }

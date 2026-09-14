@@ -40,4 +40,21 @@ public class TagActionTests : TestBase
         PrintJsonResult(result);
         Assert.IsNotNull(result);
     }
+
+    [TestMethod]
+    public async Task CreateTag_ReturnsCreatedTag()
+    {
+        // Arrange
+        var createInput = new CreateTagRequest
+        {
+            TagName = "test from tests"
+        };
+
+        // Act
+        var result = await Actions.CreateTag(createInput);
+
+        // Assert
+        PrintJsonResult(result);
+        Assert.IsNotNull(result);
+    }
 }
