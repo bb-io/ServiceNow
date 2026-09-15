@@ -39,6 +39,27 @@ A ServiceNow administrator can install it as follows:
    - Open **REST API Explorer**.
    - Check that `sn_km_api` is available in the **Namespace** list.
 
+## Setting up tag permissions
+
+Tags are not a field on the article - they live in a separate `label_entry` join table whose key fields are locked down 
+out of the box. Without this setup, **Add tag to article** and **Remove tag from article** actions silently do nothing. 
+Reading and filtering by tags works without it.
+
+Add `tags_admin` and `global_tags_creator` to the integration user's roles. 
+Then, as an administrator, elevate to `security_admin` via the avatar menu, create a role (for example, `u_blackbird_integration`) 
+under **User Administration → Roles** and assign it to the integration user.
+
+Under **System Security → Access Control (ACL)**, create five records, 
+each with **Type** `record` and **Requires role** `u_blackbird_integration`:
+
+| Operation | Table                     | Field       |
+|-----------|---------------------------|-------------|
+| create    | Label Entry [label_entry] | none        |
+| delete    | Label Entry [label_entry] | none        |
+| create    | Label Entry [label_entry] | `table`     |
+| create    | Label Entry [label_entry] | `table_key` |
+| create    | Label Entry [label_entry] | `label`     |
+
 ## Connecting
 
 1. Navigate to Apps and search for **ServiceNow**.
@@ -86,6 +107,8 @@ A ServiceNow administrator can install it as follows:
 - **Get tags** — Get details for a specific tag.
 - **Create tag** — Create a new tag.
 - **Delete tag** — Delete an existing tag.
+- **Add tag to article** — Add a tag to an existing article.
+- **Remove tag from article** — Remove a tag from an article.
 
 ## Events
 
