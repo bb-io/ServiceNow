@@ -1,3 +1,4 @@
+using Apps.ServiceNow.Utils.JsonConverters;
 using Newtonsoft.Json;
 
 namespace Apps.ServiceNow.Models.Dtos.Label;
@@ -10,6 +11,7 @@ public class LabelEntryDto
     [JsonProperty("table_key")]
     public string? TableKey { get; set; }
 
-    [JsonProperty("label")]
+    // Can be either a string or an object
+    [JsonProperty("label"), JsonConverter(typeof(ReferenceConverter))]
     public string? Label { get; set; }
 }
