@@ -22,6 +22,18 @@ public class ArticleCreatedOrUpdatedFilter
 
     [Display("Ignore translations", Description = "Only trigger for source articles. ServiceNow stores every translation as its own article, so with this off a translation written by 'Upload article' also triggers this event, which makes a translation flow trigger on its own output.")]
     public bool? IgnoreTranslations { get; set; }
+    
+    [Display("Tag IDs (all must be present)")]
+    [DataSource(typeof(TagDataHandler))]
+    public IEnumerable<string>? AllTagIds { get; set; }
+
+    [Display("Tag IDs (at least one must be present)")]
+    [DataSource(typeof(TagDataHandler))]
+    public IEnumerable<string>? AnyTagIds { get; set; }
+
+    [Display("Exclude tags", Description = "Skip articles carrying any of these tags. Takes precedence over the include filters.")]
+    [DataSource(typeof(TagDataHandler))]
+    public IEnumerable<string>? ExcludeTagIds { get; set; }
 }
 
 public class ArticleStatusChangedFilter
