@@ -11,5 +11,5 @@ public class LabelEntryDto
     public string? TableKey { get; set; }
 
     [JsonProperty("label")]
-    public LabelDto? Label { get; set; }
+    public string? Label { get; set; }
 }

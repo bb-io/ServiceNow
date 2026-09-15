@@ -102,13 +102,13 @@ public partial class Client
 
             foreach (var entry in entries)
             {
-                if (string.IsNullOrWhiteSpace(entry.TableKey) || string.IsNullOrWhiteSpace(entry.Label?.Value))
+                if (string.IsNullOrWhiteSpace(entry.TableKey) || string.IsNullOrWhiteSpace(entry.Label))
                     continue;
 
                 if (!map.TryGetValue(entry.TableKey, out var tags))
                     map[entry.TableKey] = tags = new HashSet<string>();
 
-                tags.Add(entry.Label.Value);
+                tags.Add(entry.Label);
             }
         }
 

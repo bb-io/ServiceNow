@@ -97,6 +97,24 @@ public class ArticleActionTests : TestBase
     }
 
     [TestMethod]
+    public async Task UpdateArticleMetadata_ExistingArticle_IsSuccess()
+    {
+        // Arrange
+        string newTitle = "zala1";
+        var updateInput = new UpdateArticleRequest
+        {
+            ArticleId = "ba59a32093d383106a23f41add03d6e0",
+            Title = newTitle
+        };
+
+        // Act
+        var result = await Actions.UpdateArticleMetadata(updateInput);
+
+        // Assert
+        Assert.AreEqual(result.Title, newTitle);
+    }
+
+    [TestMethod]
     public async Task Roundtrip_DownloadThenUpload_WritesTranslatedFieldsBack()
     {
         var downloaded = await Actions.DownloadArticle(new DownloadArticleRequest
