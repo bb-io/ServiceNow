@@ -61,7 +61,7 @@ public class TagActions(InvocationContext invocationContext) : Invocable(invocat
         await Client.DeleteRecordAsync(ApiEndpoints.LabelTable, tagInput.TagId);
     }
 
-    [Action("Add tag to article", Description = "Add a tag (label) to an existing article.")]
+    [Action("Add tag to article", Description = "Add a tag to an existing article.")]
     public async Task AddTagToArticle(
         [ActionParameter] TagIdentifier tagInput,
         [ActionParameter] ArticleIdentifier articleInput)
@@ -82,5 +82,21 @@ public class TagActions(InvocationContext invocationContext) : Invocable(invocat
                 "Please add the necessary 'create' ACL permissions for the user to perform this action: " +
                 "'label_entry.table', 'label_entry.table_key' and 'label_entry.label'.");
         }
+    }
+    
+    [Action("Remove tag from article", Description = "Remove a tag from an article.")]
+    public async Task RemoveTagFromArticle(
+        [ActionParameter] TagIdentifier tagInput,
+        [ActionParameter] ArticleIdentifier articleInput)
+    {
+        var body = new Dictionary<string, string>
+        {
+            ["sysparm_query"] = $"table={TableNames.Knowledge}^table_key={articleInput.ArticleId}^label={tagInput.TagId}",
+            ["sysparm_fields"] = "sys_id",
+        };
+        var entries = await Client.SearchTableAsync<LabelEntryDto>(ApiEndpoints.LabelEntryTable, body);
+        
+        foreach (var entry in entries)
+            await Client.DeleteRecordAsync(ApiEndpoints.LabelEntryTable, entry.SysId);
     }
 }

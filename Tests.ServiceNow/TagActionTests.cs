@@ -81,8 +81,16 @@ public class TagActionTests : TestBase
 
         // Act
         await Actions.AddTagToArticle(tagInput, articleInput);
+    }
 
-        // Assert
+    [TestMethod]
+    public async Task RemoveTagFromArticle_IsSuccess()
+    {
+        // Arrange
+        var tagInput = new TagIdentifier { TagId = "01189d24931f03106a23f41add03d6ac" };
+        var articleInput = new ArticleIdentifier { ArticleId = "ba59a32093d383106a23f41add03d6e0" };
 
+        // Act
+        await Actions.RemoveTagFromArticle(tagInput, articleInput);
     }
 }
