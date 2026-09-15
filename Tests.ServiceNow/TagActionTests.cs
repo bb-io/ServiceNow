@@ -71,4 +71,18 @@ public class TagActionTests : TestBase
         // Assert
         await Assert.ThrowsExceptionAsync<PluginMisconfigurationException>(() => Actions.GetTag(tagInput));
     }
+
+    [TestMethod]
+    public async Task AddTagToArticle_IsSuccess()
+    {
+        // Arrange
+        var tagInput = new TagIdentifier { TagId = "01189d24931f03106a23f41add03d6ac" };
+        var articleInput = new ArticleIdentifier { ArticleId = "ba59a32093d383106a23f41add03d6e0" };
+
+        // Act
+        await Actions.AddTagToArticle(tagInput, articleInput);
+
+        // Assert
+
+    }
 }

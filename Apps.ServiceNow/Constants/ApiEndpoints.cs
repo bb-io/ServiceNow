@@ -11,6 +11,7 @@ public static class ApiEndpoints
     public const string JournalTable = $"{Table}/{TableNames.Journal}";
     public const string AttachmentTable = $"{Table}/{TableNames.Attachment}";
     public const string LabelTable = $"{Table}/{TableNames.Label}";
+    public const string LabelEntryTable = $"{Table}/{TableNames.LabelEntry}";
 
     public const string Attachment = "/api/now/attachment";
 
