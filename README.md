@@ -15,7 +15,7 @@ Before you can connect, you need:
 - A ServiceNow instance (for example `https://your-instance.service-now.com`).
 - The **Knowledge API** application (`sn_km_api`) installed on the instance. See [Installing the Knowledge API](#installing-the-knowledge-api).
 - A dedicated integration user (`sys_user_list.do`) with the roles `snc_basic_auth_api_access`,
-  `snc_platform_rest_api_access`, `knowledge`, `knowledge_admin` and `itil`.
+  `snc_platform_rest_api_access`, `knowledge`, `knowledge_admin`, `tags_admin` and `itil`.
 - The username and password of that account.
 
 > **Note**: An admin account will not work: ServiceNow blocks basic authentication for interactive users
@@ -38,6 +38,27 @@ A ServiceNow administrator can install it as follows:
 6. To verify the installation:
    - Open **REST API Explorer**.
    - Check that `sn_km_api` is available in the **Namespace** list.
+
+## Setting up tag permissions
+
+Tags are not a field on the article - they live in a separate `label_entry` join table whose key fields are locked down 
+out of the box. Without this setup, **Add tag to article** and **Remove tag from article** actions silently do nothing. 
+Reading and filtering by tags works without it.
+
+Add `tags_admin` and `global_tags_creator` to the integration user's roles. 
+Then, as an administrator, elevate to `security_admin` via the avatar menu, create a role (for example, `u_blackbird_integration`) 
+under **User Administration → Roles** and assign it to the integration user.
+
+Under **System Security → Access Control (ACL)**, create five records, 
+each with **Type** `record` and **Requires role** `u_blackbird_integration`:
+
+| Operation | Table                     | Field       |
+|-----------|---------------------------|-------------|
+| create    | Label Entry [label_entry] | none        |
+| delete    | Label Entry [label_entry] | none        |
+| create    | Label Entry [label_entry] | `table`     |
+| create    | Label Entry [label_entry] | `table_key` |
+| create    | Label Entry [label_entry] | `label`     |
 
 ## Connecting
 
@@ -79,6 +100,15 @@ A ServiceNow administrator can install it as follows:
 ### Attachments
 
 - **Download attachment** — Download the file content of an attachment by its ID.
+
+### Tags
+
+- **Search tags** — Search all available tags.
+- **Get tags** — Get details for a specific tag.
+- **Create tag** — Create a new tag.
+- **Delete tag** — Delete an existing tag.
+- **Add tag to article** — Add a tag to an existing article.
+- **Remove tag from article** — Remove a tag from an article.
 
 ## Events
 

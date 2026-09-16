@@ -9,4 +9,6 @@ public static class TableNames
     public const string Incident = "incident";
     public const string Journal = "sys_journal_field";
     public const string Attachment = "sys_attachment";
+    public const string Label = "label";
+    public const string LabelEntry = "label_entry";
 }

@@ -1,5 +1,6 @@
 using Apps.ServiceNow.Constants;
 using Apps.ServiceNow.Models.Dtos;
+using Apps.ServiceNow.Models.Dtos.Label;
 using Newtonsoft.Json;
 using RestSharp;
 
@@ -74,6 +75,46 @@ public partial class Client
         return max.HasValue ? results.Take(max.Value).ToList() : results;
     }
 
+    public async Task<Dictionary<string, HashSet<string>>> GetArticleTagsAsync(
+        IReadOnlyCollection<string> articleIds, 
+        IReadOnlyCollection<string>? onlyTags = null)
+    {
+        var map = new Dictionary<string, HashSet<string>>();
+
+        foreach (var chunk in articleIds.Chunk(100))
+        {
+            var clauses = new List<string>
+            {
+                $"table={TableNames.Knowledge}",
+                $"table_keyIN{string.Join(",", chunk)}",
+            };
+
+            if (onlyTags is { Count: > 0 })
+                clauses.Add($"labelIN{string.Join(",", onlyTags)}");
+
+            var searchBody = new Dictionary<string, string>
+            {
+                ["sysparm_query"] = string.Join("^", clauses),
+                ["sysparm_fields"] = "table_key,label",
+                ["sysparm_exclude_reference_link"] = "true",
+            };
+            var entries = await SearchTableAsync<LabelEntryDto>(ApiEndpoints.LabelEntryTable, searchBody);
+
+            foreach (var entry in entries)
+            {
+                if (string.IsNullOrWhiteSpace(entry.TableKey) || string.IsNullOrWhiteSpace(entry.Label))
+                    continue;
+
+                if (!map.TryGetValue(entry.TableKey, out var tags))
+                    map[entry.TableKey] = tags = new HashSet<string>();
+
+                tags.Add(entry.Label);
+            }
+        }
+
+        return map;
+    }
+    
     public async Task<List<AttachmentDto>> ListAttachmentsAsync(string table, string recordId)
     {
         var request = new RestRequest(ApiEndpoints.Attachment, Method.Get)

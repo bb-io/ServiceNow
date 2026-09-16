@@ -40,6 +40,24 @@ public class ArticlePollingList(InvocationContext invocationContext) : Invocable
         };
 
         var dtos = await Client.SearchTableAsync<ArticleDto>(ApiEndpoints.KnowledgeTable, query);
+        
+        var filterTags = (filter.AllTagIds ?? [])
+            .Concat(filter.AnyTagIds ?? [])
+            .Concat(filter.ExcludeTagIds ?? [])
+            .Distinct()
+            .ToList();
+
+        if (filterTags.Count > 0)
+        {
+            var tagMap = await Client.GetArticleTagsAsync(dtos.Select(d => d.SysId).ToList(), filterTags);
+
+            dtos = dtos.Where(d => TagHelper.MatchesTagFilter(
+                    tagMap.GetValueOrDefault(d.SysId, []),
+                    filter.AllTagIds?.ToList(), 
+                    filter.AnyTagIds?.ToList(), 
+                    filter.ExcludeTagIds?.ToList()))
+                .ToList();
+        }
 
         var items = dtos
             .Select(dto => new ArticleEventItem(dto, ClassifyEventType(dto, since)))
